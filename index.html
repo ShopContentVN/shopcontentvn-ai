@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>ShopContentVN AI</title>
-    <meta name="description" content="Tạo caption, mô tả Shopee, hook video và kịch bản livestream cho seller Việt." />
+    <meta name="description" content="AI content studio cho seller Viet: tao caption TikTok, mo ta Shopee, hook video va kich ban livestream." />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -13,107 +13,175 @@
         <span class="brand-logo">SC</span>
         <span>
           <strong>ShopContentVN</strong>
-          <small>AI Content Studio</small>
+          <small>AI Studio cho seller Việt</small>
         </span>
       </a>
       <nav class="site-nav" aria-label="Điều hướng">
-        <a href="#templates">Template Hub</a>
-        <a href="#tool">Dùng thử</a>
-        <a href="#submit">Gửi ý tưởng</a>
-        <button type="button" id="copyAllTop" class="ghost-button">Copy tất cả</button>
+        <a href="#templates">Templates</a>
+        <a href="#tool">Studio</a>
+        <a href="#examples">Ví dụ</a>
+        <a href="#submit">Góp ý</a>
+        <button type="button" id="copyAllTop" class="ghost-button">Copy output</button>
       </nav>
     </header>
 
-    <main id="top" class="page-shell">
+    <main id="top">
       <section class="hero">
-        <div class="hero-copy">
-          <p class="eyebrow">Beta miễn phí cho seller Việt</p>
-          <h1>Kho template + AI content cho seller Việt.</h1>
-          <p class="hero-subtitle">
-            Chọn template theo tình huống bán hàng, nhập sản phẩm, rồi tạo caption, mô tả Shopee,
-            hook video và kịch bản livestream để copy dùng ngay.
-          </p>
-          <div class="hero-actions">
-            <a class="primary-link" href="#tool">Tạo nội dung ngay</a>
-            <button type="button" id="fillDemo" class="secondary-button">Điền mẫu</button>
+        <div class="hero-stage">
+          <div class="hero-copy">
+            <p class="eyebrow">Public beta · miễn phí cho seller nhỏ</p>
+            <h1>Biến một tên sản phẩm thành cả bộ nội dung bán hàng.</h1>
+            <p class="hero-subtitle">
+              Chọn tình huống, nhập vài dòng brief, rồi lấy caption TikTok, mô tả Shopee,
+              hook video và kịch bản livestream có thể copy dùng ngay.
+            </p>
+            <div class="hero-actions">
+              <a class="primary-link" href="#tool">Mở Content Studio</a>
+              <button type="button" id="fillDemo" class="secondary-button">Chạy demo mẫu</button>
+            </div>
           </div>
-          <div class="trust-row" aria-label="Các định dạng hỗ trợ">
-            <span>Caption TikTok</span>
-            <span>Mô tả Shopee</span>
-            <span>Hook video</span>
-            <span>Livestream</span>
+
+          <div class="hero-console" aria-label="Preview sản phẩm">
+            <div class="console-top">
+              <span></span><span></span><span></span>
+              <strong>ShopContentVN Workspace</strong>
+            </div>
+            <div class="console-body">
+              <aside class="console-rail">
+                <b>01</b>
+                <b>02</b>
+                <b>03</b>
+              </aside>
+              <div class="console-main">
+                <div class="prompt-card">
+                  <span>Brief</span>
+                  <strong>Kem chống nắng cho da dầu</strong>
+                  <p>Khách sợ bóng mặt, bí da, nặng mặt khi dùng hằng ngày.</p>
+                </div>
+                <div class="mini-grid">
+                  <article>
+                    <span>Caption</span>
+                    <p>Nếu bạn bôi chống nắng mà mặt luôn bóng dầu...</p>
+                  </article>
+                  <article>
+                    <span>Hook video</span>
+                    <p>3 dấu hiệu kem chống nắng không hợp da dầu.</p>
+                  </article>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <aside class="hero-preview" aria-label="Ảnh thương hiệu ShopContentVN">
-          <img src="./shopcontentvn-x-header.png" alt="ShopContentVN AI Content cho Seller Việt" />
-          <div class="preview-panel">
-            <span>Beta usage</span>
-            <strong>Free</strong>
-            <p>Đang mở test để lấy feedback từ seller nhỏ.</p>
-          </div>
-        </aside>
-      </section>
-
-      <section class="metrics" aria-label="Tóm tắt sản phẩm">
-        <article>
-          <span>Template</span>
-          <strong>8 khung mở đầu</strong>
-        </article>
-        <article>
-          <span>Kênh bán</span>
-          <strong>Shopee / TikTok</strong>
-        </article>
-        <article>
-          <span>Tốc độ</span>
-          <strong>Dưới 30 giây</strong>
-        </article>
+        <div class="hero-strip" aria-label="Tính năng chính">
+          <article>
+            <span>Template hub</span>
+            <strong>Chọn tình huống trước</strong>
+          </article>
+          <article>
+            <span>AI studio</span>
+            <strong>Viết lại theo sản phẩm</strong>
+          </article>
+          <article>
+            <span>Output</span>
+            <strong>Copy từng phần</strong>
+          </article>
+          <article>
+            <span>Data</span>
+            <strong>Gom nhu cầu seller</strong>
+          </article>
+        </div>
       </section>
 
       <section id="templates" class="template-hub">
         <div class="section-head">
           <div>
-            <p class="eyebrow">Template Hub</p>
-            <h2>Chọn tình huống trước, rồi để AI viết lại theo sản phẩm.</h2>
+            <p class="eyebrow">Template marketplace</p>
+            <h2>Không bắt seller nghĩ từ trang trắng.</h2>
           </div>
-          <p>Không bắt seller nghĩ từ trang trắng. Chọn khung phù hợp, nhập sản phẩm, lấy nội dung đem đăng.</p>
+          <p>
+            App phải cho người dùng cảm giác có một kho công thức thật. Bấm template là brief
+            tự đổi theo tình huống, sau đó AI viết lại theo sản phẩm của shop.
+          </p>
         </div>
 
         <div class="template-grid" aria-label="Thư viện template">
           <button type="button" class="template-card active" data-template="problem">
-            <span>01</span>
+            <span class="template-index">01</span>
             <strong>Mở bằng vấn đề</strong>
-            <small>Cho sản phẩm cần đánh đúng nỗi đau của khách.</small>
+            <small>Đánh đúng nỗi đau khách trước khi nói tới sản phẩm.</small>
+            <em>Skincare · đồ gia dụng · thời trang</em>
           </button>
           <button type="button" class="template-card" data-template="comparison">
-            <span>02</span>
+            <span class="template-index">02</span>
             <strong>So sánh trước/sau</strong>
-            <small>Hợp video TikTok, skincare, thời trang, đồ gia dụng.</small>
+            <small>Hợp video TikTok, review sản phẩm, biến đổi rõ ràng.</small>
+            <em>Video ngắn · review · before/after</em>
           </button>
           <button type="button" class="template-card" data-template="threeReasons">
-            <span>03</span>
+            <span class="template-index">03</span>
             <strong>3 lý do nên mua</strong>
             <small>Gọn, rõ lợi ích, dễ dùng cho caption và mô tả.</small>
+            <em>Caption · mô tả · landing</em>
           </button>
           <button type="button" class="template-card" data-template="livestream">
-            <span>04</span>
+            <span class="template-index">04</span>
             <strong>Livestream chốt đơn</strong>
-            <small>Mở live, gọi vấn đề, chốt lợi ích, CTA.</small>
+            <small>Mở live, gọi vấn đề, chốt lợi ích, kêu comment.</small>
+            <em>Live TikTok · Shopee Live</em>
           </button>
           <button type="button" class="template-card" data-template="shopee">
-            <span>05</span>
+            <span class="template-index">05</span>
             <strong>Mô tả Shopee rõ ràng</strong>
-            <small>Cho shop cần mô tả bớt khô và dễ đọc hơn.</small>
+            <small>Biến mô tả khô thành nội dung dễ đọc, dễ tư vấn.</small>
+            <em>Shopee · TikTok Shop</em>
           </button>
           <button type="button" class="template-card" data-template="comment">
-            <span>06</span>
+            <span class="template-index">06</span>
             <strong>Câu kéo comment</strong>
-            <small>Gợi ý CTA để khách hỏi size, màu, giá, mẫu.</small>
+            <small>Tạo CTA để khách hỏi size, màu, giá, mẫu phù hợp.</small>
+            <em>Comment · inbox · tư vấn</em>
           </button>
         </div>
       </section>
 
-      <section id="tool" class="tool-shell">
+      <section id="tool" class="studio-shell">
+        <aside class="studio-panel left-panel">
+          <div class="panel-title">
+            <p class="eyebrow">Creator OS</p>
+            <h2>Quy trình 3 bước</h2>
+          </div>
+          <div class="workflow-list">
+            <article class="active">
+              <b>1</b>
+              <div>
+                <strong>Chọn template</strong>
+                <span>Lấy khung theo tình huống bán hàng.</span>
+              </div>
+            </article>
+            <article>
+              <b>2</b>
+              <div>
+                <strong>Nhập brief</strong>
+                <span>Tên sản phẩm, khách hàng, vấn đề, lợi ích.</span>
+              </div>
+            </article>
+            <article>
+              <b>3</b>
+              <div>
+                <strong>Copy output</strong>
+                <span>Caption, Shopee, hook, livestream.</span>
+              </div>
+            </article>
+          </div>
+
+          <div class="insight-card">
+            <span>Beta signal</span>
+            <strong>Seller không cần AI chung chung.</strong>
+            <p>Họ cần template đúng cảnh bán hàng, output ngắn, rõ, copy được liền.</p>
+          </div>
+        </aside>
+
         <form id="generatorForm" class="brief-card">
           <div class="card-head">
             <div>
@@ -198,8 +266,8 @@
         <section class="result-card" aria-live="polite">
           <div class="card-head">
             <div>
-              <p class="eyebrow">Generated content</p>
-              <h2>Bộ nội dung có thể copy ngay</h2>
+              <p class="eyebrow">Generated workspace</p>
+              <h2>Output sẵn để đăng</h2>
             </div>
             <button type="button" id="copyAll" class="text-button">Copy tất cả</button>
           </div>
@@ -240,7 +308,7 @@
                 </div>
                 <button type="button" class="copy-button" data-copy="hooksOutput">Copy</button>
               </div>
-              <pre id="hooksOutput">App sẽ gợi ý 3 câu mở đầu video.</pre>
+              <pre id="hooksOutput">App sẽ gợi ý 3-5 câu mở đầu video.</pre>
             </article>
 
             <article class="output-card">
@@ -257,13 +325,36 @@
         </section>
       </section>
 
+      <section class="example-section">
+        <div class="section-head compact">
+          <div>
+            <p class="eyebrow">Before / After</p>
+            <h2>Người dùng cần thấy app giúp họ tốt hơn thật.</h2>
+          </div>
+        </div>
+        <div class="before-after-grid">
+          <article>
+            <span>Trước</span>
+            <p>Kem chống nắng cho da dầu. Mỏng nhẹ, không bí da, dùng hằng ngày.</p>
+          </article>
+          <article class="after">
+            <span>Sau</span>
+            <p>Nếu bôi chống nắng mà mặt cứ bóng dầu sau 1 tiếng, thử loại mỏng nhẹ, ráo mặt, không bí da này. Hợp cho da dầu dùng mỗi ngày.</p>
+          </article>
+          <article class="after">
+            <span>Hook video</span>
+            <p>3 dấu hiệu kem chống nắng của bạn đang làm da dầu bí hơn.</p>
+          </article>
+        </div>
+      </section>
+
       <section id="submit" class="submit-panel">
         <div>
           <p class="eyebrow">Seller request board</p>
-          <h2>Gửi ngành hàng hoặc vấn đề bạn hay bí.</h2>
+          <h2>Cho seller gửi vấn đề, mình biến thành template mới.</h2>
           <p>
-            Mỗi góp ý sẽ giúp ShopContentVN biết seller cần template gì nhất.
-            Đây là dữ liệu để biến app thành kho template thật, không phải form generate một lần.
+            Đây là phần làm app khác một tool demo. Người dùng gửi ngành hàng và vấn đề họ hay bí,
+            mình gom dữ liệu để cập nhật template theo nhu cầu thật.
           </p>
         </div>
         <form id="feedbackForm" class="feedback-form">

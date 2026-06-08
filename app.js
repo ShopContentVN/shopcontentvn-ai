@@ -89,7 +89,7 @@ const templateBriefs = {
 const toneMap = {
   friendly: {
     opener: "Nói thật, nếu bạn đang tìm một món dễ dùng hằng ngày thì nên xem thử",
-    cta: "Comment \"mình cần\" để shop tư vấn mẫu phù hợp nha.",
+    cta: 'Comment "mình cần" để shop tư vấn mẫu phù hợp nha.',
     style: "gần gũi, dễ đọc",
   },
   premium: {
@@ -194,18 +194,48 @@ const renderContent = (content) => {
   outputs.live.textContent = content.live;
 };
 
+const showToast = (message) => {
+  toast.textContent = message;
+  toast.classList.add("show");
+  window.setTimeout(() => toast.classList.remove("show"), 1500);
+};
+
+const updateBriefQuality = () => {
+  const fields = ["productName", "customer", "painPoint", "benefits"];
+  const filled = fields.filter((key) => normalize(form.elements[key]?.value, "")).length;
+  const width = 24 + filled * 19;
+  briefQualityBar.style.width = `${Math.min(width, 100)}%`;
+
+  if (filled <= 1) briefQuality.textContent = "Cần thêm thông tin";
+  if (filled === 2) briefQuality.textContent = "Tạm ổn";
+  if (filled === 3) briefQuality.textContent = "Tốt";
+  if (filled >= 4) briefQuality.textContent = "Rất tốt";
+};
+
+const simulateGenerate = async () => {
+  const input = getFormData();
+  loadingState.hidden = false;
+  outputGrid.style.opacity = "0.45";
+
+  try {
+    const content = await generateWithApi(input);
+    renderContent(content);
+    showToast("Đã tạo bằng AI");
+  } catch (error) {
+    renderContent(buildContent(input));
+    showToast("Đang chạy bản demo");
+  } finally {
+    loadingState.hidden = true;
+    outputGrid.style.opacity = "1";
+  }
+};
+
 const fillSample = (sample) => {
   Object.entries(sample).forEach(([key, value]) => {
     if (form.elements[key]) form.elements[key].value = value;
   });
   updateBriefQuality();
   simulateGenerate();
-};
-
-const showToast = (message) => {
-  toast.textContent = message;
-  toast.classList.add("show");
-  window.setTimeout(() => toast.classList.remove("show"), 1500);
 };
 
 const applyTemplate = (templateKey) => {
@@ -269,36 +299,6 @@ const getAllOutput = () =>
     outputs.live.textContent,
   ].join("\n");
 
-const updateBriefQuality = () => {
-  const fields = ["productName", "customer", "painPoint", "benefits"];
-  const filled = fields.filter((key) => normalize(form.elements[key]?.value, "")).length;
-  const width = 24 + filled * 19;
-  briefQualityBar.style.width = `${Math.min(width, 100)}%`;
-
-  if (filled <= 1) briefQuality.textContent = "Cần thêm thông tin";
-  if (filled === 2) briefQuality.textContent = "Tạm ổn";
-  if (filled === 3) briefQuality.textContent = "Tốt";
-  if (filled >= 4) briefQuality.textContent = "Rất tốt";
-};
-
-const simulateGenerate = async () => {
-  const input = getFormData();
-  loadingState.hidden = false;
-  outputGrid.style.opacity = "0.45";
-
-  try {
-    const content = await generateWithApi(input);
-    renderContent(content);
-    showToast("Đã tạo bằng AI");
-  } catch (error) {
-    renderContent(buildContent(input));
-    showToast("Đang chạy bản demo");
-  } finally {
-    loadingState.hidden = true;
-    outputGrid.style.opacity = "1";
-  }
-};
-
 form.addEventListener("input", updateBriefQuality);
 
 form.addEventListener("submit", (event) => {
@@ -312,7 +312,7 @@ clearFormButton.addEventListener("click", () => {
   form.reset();
   outputs.caption.textContent = 'Nhập sản phẩm rồi bấm "Tạo bộ nội dung".';
   outputs.description.textContent = "Mô tả sản phẩm sẽ nằm ở đây.";
-  outputs.hooks.textContent = "App sẽ gợi ý 3 câu mở đầu video.";
+  outputs.hooks.textContent = "App sẽ gợi ý 3-5 câu mở đầu video.";
   outputs.live.textContent = "Kịch bản live ngắn sẽ nằm ở đây.";
   updateBriefQuality();
   showToast("Đã reset");

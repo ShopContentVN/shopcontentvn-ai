@@ -14,20 +14,20 @@ FEEDBACK_PATH = APP_DIR / "feedback.csv"
 
 
 SYSTEM_PROMPT = """
-Ban la chuyen gia content cho seller Viet ban hang tren Shopee, TikTok Shop va Facebook.
-Nhiem vu: tao noi dung ban hang ro rang, de copy, dung tieng Viet tu nhien.
-Khong noi chung chung. Khong bia thong so san pham. Khong hua hen qua da.
-Output bat buoc la JSON hop le voi 4 key: caption, description, hooks, live.
-Moi value la string tieng Viet.
+Bạn là chuyên gia content cho seller Việt bán hàng trên Shopee, TikTok Shop và Facebook.
+Nhiệm vụ: tạo nội dung bán hàng rõ ràng, dễ copy, dùng tiếng Việt tự nhiên.
+Không nói chung chung. Không bịa thông số sản phẩm. Không hứa hẹn quá đà.
+Output bắt buộc là JSON hợp lệ với 4 key: caption, description, hooks, live.
+Mỗi value là string tiếng Việt.
 """.strip()
 
 
 def fallback_content(payload):
-    product = payload.get("product") or "san pham cua shop"
-    customer = payload.get("customer") or "khach mua online"
-    pain = payload.get("pain") or "muon chon nhanh nhung so mua khong hop"
+    product = payload.get("product") or "sản phẩm của shop"
+    customer = payload.get("customer") or "khách mua online"
+    pain = payload.get("pain") or "muốn chọn nhanh nhưng sợ mua không hợp"
     channel = payload.get("channel") or "TikTok Shop"
-    benefits = payload.get("benefits") or "de dung, dep, hop nhu cau hang ngay"
+    benefits = payload.get("benefits") or "dễ dùng, đẹp, hợp nhu cầu hằng ngày"
 
     parts = [item.strip() for item in benefits.replace(";", ",").split(",") if item.strip()]
     bullet_lines = "\n".join(f"- {item[:1].upper() + item[1:]}" for item in parts[:5])
@@ -35,28 +35,28 @@ def fallback_content(payload):
 
     return {
         "caption": (
-            f"Neu ban dang {pain}, xem thu {product}.\n\n"
-            f"Diem dang chu y:\n{bullet_lines}\n\n"
-            f"Phu hop cho: {customer}.\n\n"
-            "Comment \"minh can\" de shop tu van mau phu hop."
+            f"Nếu bạn đang {pain}, xem thử {product}.\n\n"
+            f"Điểm đáng chú ý:\n{bullet_lines}\n\n"
+            f"Phù hợp cho: {customer}.\n\n"
+            "Comment \"mình cần\" để shop tư vấn mẫu phù hợp."
         ),
         "description": (
             f"{product[:1].upper() + product[1:]}\n\n"
-            f"Phu hop cho {customer}. San pham tap trung vao nhu cau: {pain}.\n\n"
-            f"Diem noi bat:\n{bullet_lines}\n\n"
-            "Shop nen bo sung size, mau, chat lieu, hinh that va chinh sach doi tra neu co."
+            f"Phù hợp cho {customer}. Sản phẩm tập trung vào nhu cầu: {pain}.\n\n"
+            f"Điểm nổi bật:\n{bullet_lines}\n\n"
+            "Shop nên bổ sung size, màu, chất liệu, hình thật và chính sách đổi trả nếu có."
         ),
         "hooks": (
-            f"1. Neu ban dang {pain}, xem thu {product} nay.\n\n"
-            f"2. 3 ly do {customer} nen can nhac {product}: {first_benefit}.\n\n"
-            f"3. Dung chon {product} chi vi re. Hay nhin vao loi ich that truoc."
+            f"1. Nếu bạn đang {pain}, xem thử {product} này.\n\n"
+            f"2. 3 lý do {customer} nên cân nhắc {product}: {first_benefit}.\n\n"
+            f"3. Đừng chọn {product} chỉ vì rẻ. Hãy nhìn vào lợi ích thật trước."
         ),
         "live": (
-            f"Kich ban live ngan cho {channel}\n\n"
-            f"1. Mo live: Ai dang tim {product} thi o lai 30 giay.\n\n"
-            f"2. Goi van de: Nhieu ban {pain}, nen chon sai rat de phi tien.\n\n"
-            f"3. Gioi thieu: Mau nay hop voi {customer}, noi bat o {benefits}.\n\n"
-            "4. CTA: Comment so 1 de shop gui thong tin va mau phu hop."
+            f"Kịch bản live ngắn cho {channel}\n\n"
+            f"1. Mở live: Ai đang tìm {product} thì ở lại 30 giây.\n\n"
+            f"2. Gọi vấn đề: Nhiều bạn {pain}, nên chọn sai rất dễ phí tiền.\n\n"
+            f"3. Giới thiệu: Mẫu này hợp với {customer}, nổi bật ở {benefits}.\n\n"
+            "4. CTA: Comment số 1 để shop gửi thông tin và mẫu phù hợp."
         ),
     }
 

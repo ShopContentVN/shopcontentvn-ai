@@ -1,6 +1,6 @@
 ﻿# ShopContentVN AI - Auto Backup
 
-Last updated: 2026-06-08 11:53:50
+Last updated: 2026-06-08 13:43:17
 
 ## Project
 
@@ -36,212 +36,377 @@ python server.py
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>ShopContentVN AI</title>
+    <meta name="description" content="AI content studio cho seller Viet: tao caption TikTok, mo ta Shopee, hook video va kich ban livestream." />
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <main class="product">
-      <aside class="sidebar">
-        <div class="brand">
-          <div class="brand-logo">SC</div>
-          <div>
-            <strong>ShopContentVN</strong>
-            <span>AI Studio</span>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="ShopContentVN AI">
+        <span class="brand-logo">SC</span>
+        <span>
+          <strong>ShopContentVN</strong>
+          <small>AI Studio cho seller Việt</small>
+        </span>
+      </a>
+      <nav class="site-nav" aria-label="Điều hướng">
+        <a href="#templates">Templates</a>
+        <a href="#tool">Studio</a>
+        <a href="#examples">Ví dụ</a>
+        <a href="#submit">Góp ý</a>
+        <button type="button" id="copyAllTop" class="ghost-button">Copy output</button>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-stage">
+          <div class="hero-copy">
+            <p class="eyebrow">Public beta · miễn phí cho seller nhỏ</p>
+            <h1>Biến một tên sản phẩm thành cả bộ nội dung bán hàng.</h1>
+            <p class="hero-subtitle">
+              Chọn tình huống, nhập vài dòng brief, rồi lấy caption TikTok, mô tả Shopee,
+              hook video và kịch bản livestream có thể copy dùng ngay.
+            </p>
+            <div class="hero-actions">
+              <a class="primary-link" href="#tool">Mở Content Studio</a>
+              <button type="button" id="fillDemo" class="secondary-button">Chạy demo mẫu</button>
+            </div>
+          </div>
+
+          <div class="hero-console" aria-label="Preview sản phẩm">
+            <div class="console-top">
+              <span></span><span></span><span></span>
+              <strong>ShopContentVN Workspace</strong>
+            </div>
+            <div class="console-body">
+              <aside class="console-rail">
+                <b>01</b>
+                <b>02</b>
+                <b>03</b>
+              </aside>
+              <div class="console-main">
+                <div class="prompt-card">
+                  <span>Brief</span>
+                  <strong>Kem chống nắng cho da dầu</strong>
+                  <p>Khách sợ bóng mặt, bí da, nặng mặt khi dùng hằng ngày.</p>
+                </div>
+                <div class="mini-grid">
+                  <article>
+                    <span>Caption</span>
+                    <p>Nếu bạn bôi chống nắng mà mặt luôn bóng dầu...</p>
+                  </article>
+                  <article>
+                    <span>Hook video</span>
+                    <p>3 dấu hiệu kem chống nắng không hợp da dầu.</p>
+                  </article>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <nav class="side-nav" aria-label="Điều hướng">
-          <button class="nav-item active" type="button"><span>01</span> Content Studio</button>
-          <button class="nav-item" type="button"><span>02</span> Templates</button>
-          <button class="nav-item" type="button"><span>03</span> History</button>
-        </nav>
-
-        <div class="usage-card">
-          <div class="usage-head">
-            <span>Beta usage</span>
-            <strong>Free</strong>
-          </div>
-          <div class="usage-bar"><span></span></div>
-          <p>Demo MVP chưa tốn phí. Bản sau sẽ gắn AI thật và giới hạn lượt dùng.</p>
-        </div>
-
-        <div class="mini-history">
-          <div class="section-label">Gần đây</div>
-          <button type="button" data-sample="shirt">Áo thun nữ form rộng</button>
-          <button type="button" data-sample="sunscreen">Kem chống nắng da dầu</button>
-          <button type="button" data-sample="lamp">Đèn livestream để bàn</button>
-        </div>
-      </aside>
-
-      <section class="main-stage">
-        <header class="topbar">
-          <div>
-            <p class="eyebrow">AI content kit cho seller Việt</p>
-            <h1>Tạo bộ nội dung bán hàng từ một sản phẩm.</h1>
-          </div>
-          <div class="top-actions">
-            <button type="button" id="fillDemo" class="secondary-button">Điền mẫu</button>
-            <button type="button" id="copyAllTop" class="primary-button">Copy tất cả</button>
-          </div>
-        </header>
-
-        <section class="metrics">
+        <div class="hero-strip" aria-label="Tính năng chính">
+          <article>
+            <span>Template hub</span>
+            <strong>Chọn tình huống trước</strong>
+          </article>
+          <article>
+            <span>AI studio</span>
+            <strong>Viết lại theo sản phẩm</strong>
+          </article>
           <article>
             <span>Output</span>
-            <strong>4 định dạng</strong>
+            <strong>Copy từng phần</strong>
           </article>
           <article>
-            <span>Kênh bán</span>
-            <strong>Shopee / TikTok</strong>
+            <span>Data</span>
+            <strong>Gom nhu cầu seller</strong>
           </article>
+        </div>
+      </section>
+
+      <section id="templates" class="template-hub">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Template marketplace</p>
+            <h2>Không bắt seller nghĩ từ trang trắng.</h2>
+          </div>
+          <p>
+            App phải cho người dùng cảm giác có một kho công thức thật. Bấm template là brief
+            tự đổi theo tình huống, sau đó AI viết lại theo sản phẩm của shop.
+          </p>
+        </div>
+
+        <div class="template-grid" aria-label="Thư viện template">
+          <button type="button" class="template-card active" data-template="problem">
+            <span class="template-index">01</span>
+            <strong>Mở bằng vấn đề</strong>
+            <small>Đánh đúng nỗi đau khách trước khi nói tới sản phẩm.</small>
+            <em>Skincare · đồ gia dụng · thời trang</em>
+          </button>
+          <button type="button" class="template-card" data-template="comparison">
+            <span class="template-index">02</span>
+            <strong>So sánh trước/sau</strong>
+            <small>Hợp video TikTok, review sản phẩm, biến đổi rõ ràng.</small>
+            <em>Video ngắn · review · before/after</em>
+          </button>
+          <button type="button" class="template-card" data-template="threeReasons">
+            <span class="template-index">03</span>
+            <strong>3 lý do nên mua</strong>
+            <small>Gọn, rõ lợi ích, dễ dùng cho caption và mô tả.</small>
+            <em>Caption · mô tả · landing</em>
+          </button>
+          <button type="button" class="template-card" data-template="livestream">
+            <span class="template-index">04</span>
+            <strong>Livestream chốt đơn</strong>
+            <small>Mở live, gọi vấn đề, chốt lợi ích, kêu comment.</small>
+            <em>Live TikTok · Shopee Live</em>
+          </button>
+          <button type="button" class="template-card" data-template="shopee">
+            <span class="template-index">05</span>
+            <strong>Mô tả Shopee rõ ràng</strong>
+            <small>Biến mô tả khô thành nội dung dễ đọc, dễ tư vấn.</small>
+            <em>Shopee · TikTok Shop</em>
+          </button>
+          <button type="button" class="template-card" data-template="comment">
+            <span class="template-index">06</span>
+            <strong>Câu kéo comment</strong>
+            <small>Tạo CTA để khách hỏi size, màu, giá, mẫu phù hợp.</small>
+            <em>Comment · inbox · tư vấn</em>
+          </button>
+        </div>
+      </section>
+
+      <section id="tool" class="studio-shell">
+        <aside class="studio-panel left-panel">
+          <div class="panel-title">
+            <p class="eyebrow">Creator OS</p>
+            <h2>Quy trình 3 bước</h2>
+          </div>
+          <div class="workflow-list">
+            <article class="active">
+              <b>1</b>
+              <div>
+                <strong>Chọn template</strong>
+                <span>Lấy khung theo tình huống bán hàng.</span>
+              </div>
+            </article>
+            <article>
+              <b>2</b>
+              <div>
+                <strong>Nhập brief</strong>
+                <span>Tên sản phẩm, khách hàng, vấn đề, lợi ích.</span>
+              </div>
+            </article>
+            <article>
+              <b>3</b>
+              <div>
+                <strong>Copy output</strong>
+                <span>Caption, Shopee, hook, livestream.</span>
+              </div>
+            </article>
+          </div>
+
+          <div class="insight-card">
+            <span>Beta signal</span>
+            <strong>Seller không cần AI chung chung.</strong>
+            <p>Họ cần template đúng cảnh bán hàng, output ngắn, rõ, copy được liền.</p>
+          </div>
+        </aside>
+
+        <form id="generatorForm" class="brief-card">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">Product brief</p>
+              <h2>Nhập thông tin sản phẩm</h2>
+            </div>
+            <button type="button" id="clearForm" class="text-button">Reset</button>
+          </div>
+
+          <div class="quality-card">
+            <div>
+              <span>Độ rõ brief</span>
+              <strong id="briefQuality">Sẵn sàng</strong>
+            </div>
+            <div class="quality-bar"><span id="briefQualityBar"></span></div>
+          </div>
+
+          <div id="examples" class="preset-row" aria-label="Sản phẩm mẫu">
+            <button type="button" data-sample="shirt">Áo thun nữ</button>
+            <button type="button" data-sample="sunscreen">Kem chống nắng</button>
+            <button type="button" data-sample="lamp">Đèn livestream</button>
+          </div>
+
+          <label class="field">
+            <span>Tên sản phẩm</span>
+            <input id="productName" name="productName" type="text" placeholder="Ví dụ: áo thun nữ form rộng" required autocomplete="off" />
+          </label>
+
+          <div class="field-grid">
+            <label class="field">
+              <span>Khách hàng</span>
+              <input id="customer" name="customer" type="text" placeholder="Ví dụ: nữ 18-28 tuổi" autocomplete="off" />
+            </label>
+
+            <label class="field">
+              <span>Kênh bán</span>
+              <select id="channel" name="channel">
+                <option value="TikTok Shop">TikTok Shop</option>
+                <option value="Shopee">Shopee</option>
+                <option value="Facebook">Facebook</option>
+              </select>
+            </label>
+          </div>
+
+          <label class="field">
+            <span>Vấn đề của khách</span>
+            <input id="painPoint" name="painPoint" type="text" placeholder="Ví dụ: muốn mặc đẹp nhưng sợ lộ bụng" autocomplete="off" />
+          </label>
+
+          <label class="field">
+            <span>Điểm nổi bật</span>
+            <input id="benefits" name="benefits" type="text" placeholder="Ví dụ: che dáng, chất mềm, dễ phối đồ" autocomplete="off" />
+          </label>
+
+          <div class="field-grid">
+            <label class="field">
+              <span>Tone nội dung</span>
+              <select id="tone" name="tone">
+                <option value="friendly">Vui vẻ, gần gũi</option>
+                <option value="premium">Chuyên nghiệp</option>
+                <option value="trend">Bắt trend</option>
+                <option value="short">Ngắn gọn</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Mức chi tiết</span>
+              <select id="detailLevel" name="detailLevel">
+                <option value="balanced">Vừa đủ</option>
+                <option value="short">Rất ngắn</option>
+                <option value="rich">Nhiều ý</option>
+              </select>
+            </label>
+          </div>
+
+          <button type="submit" id="generateButton" class="generate-button">
+            <span>Tạo bộ nội dung</span>
+            <b>Generate</b>
+          </button>
+        </form>
+
+        <section class="result-card" aria-live="polite">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">Generated workspace</p>
+              <h2>Output sẵn để đăng</h2>
+            </div>
+            <button type="button" id="copyAll" class="text-button">Copy tất cả</button>
+          </div>
+
+          <div class="loading" id="loadingState" hidden>
+            <div class="loader"></div>
+            <span>Đang dựng caption, mô tả, hook và kịch bản...</span>
+          </div>
+
+          <div class="output-grid" id="outputGrid">
+            <article class="output-card highlight">
+              <div class="output-head">
+                <div>
+                  <span class="tag">01</span>
+                  <strong>Caption TikTok/Facebook</strong>
+                </div>
+                <button type="button" class="copy-button" data-copy="captionOutput">Copy</button>
+              </div>
+              <pre id="captionOutput">Nhập sản phẩm rồi bấm "Tạo bộ nội dung".</pre>
+            </article>
+
+            <article class="output-card">
+              <div class="output-head">
+                <div>
+                  <span class="tag">02</span>
+                  <strong>Mô tả Shopee</strong>
+                </div>
+                <button type="button" class="copy-button" data-copy="descriptionOutput">Copy</button>
+              </div>
+              <pre id="descriptionOutput">Mô tả sản phẩm sẽ nằm ở đây.</pre>
+            </article>
+
+            <article class="output-card">
+              <div class="output-head">
+                <div>
+                  <span class="tag">03</span>
+                  <strong>Hook video</strong>
+                </div>
+                <button type="button" class="copy-button" data-copy="hooksOutput">Copy</button>
+              </div>
+              <pre id="hooksOutput">App sẽ gợi ý 3-5 câu mở đầu video.</pre>
+            </article>
+
+            <article class="output-card">
+              <div class="output-head">
+                <div>
+                  <span class="tag">04</span>
+                  <strong>Kịch bản livestream</strong>
+                </div>
+                <button type="button" class="copy-button" data-copy="liveOutput">Copy</button>
+              </div>
+              <pre id="liveOutput">Kịch bản live ngắn sẽ nằm ở đây.</pre>
+            </article>
+          </div>
+        </section>
+      </section>
+
+      <section class="example-section">
+        <div class="section-head compact">
+          <div>
+            <p class="eyebrow">Before / After</p>
+            <h2>Người dùng cần thấy app giúp họ tốt hơn thật.</h2>
+          </div>
+        </div>
+        <div class="before-after-grid">
           <article>
-            <span>Thời gian</span>
-            <strong>&lt; 30 giây</strong>
+            <span>Trước</span>
+            <p>Kem chống nắng cho da dầu. Mỏng nhẹ, không bí da, dùng hằng ngày.</p>
           </article>
-        </section>
+          <article class="after">
+            <span>Sau</span>
+            <p>Nếu bôi chống nắng mà mặt cứ bóng dầu sau 1 tiếng, thử loại mỏng nhẹ, ráo mặt, không bí da này. Hợp cho da dầu dùng mỗi ngày.</p>
+          </article>
+          <article class="after">
+            <span>Hook video</span>
+            <p>3 dấu hiệu kem chống nắng của bạn đang làm da dầu bí hơn.</p>
+          </article>
+        </div>
+      </section>
 
-        <section class="workspace">
-          <form id="generatorForm" class="brief-panel">
-            <div class="panel-title">
-              <div>
-                <p class="eyebrow">Product brief</p>
-                <h2>Thông tin đầu vào</h2>
-              </div>
-              <button type="button" id="clearForm" class="text-button">Reset</button>
-            </div>
-
-            <div class="quality-card">
-              <div>
-                <span>Brief quality</span>
-                <strong id="briefQuality">Sẵn sàng</strong>
-              </div>
-              <div class="quality-bar"><span id="briefQualityBar"></span></div>
-            </div>
-
-            <div class="preset-row" aria-label="Sản phẩm mẫu">
-              <button type="button" data-sample="shirt">Áo thun nữ</button>
-              <button type="button" data-sample="sunscreen">Kem chống nắng</button>
-              <button type="button" data-sample="lamp">Đèn livestream</button>
-            </div>
-
-            <label class="field">
-              <span>Tên sản phẩm</span>
-              <input id="productName" name="productName" type="text" placeholder="Ví dụ: áo thun nữ form rộng" required autocomplete="off" />
-            </label>
-
-            <div class="field-grid">
-              <label class="field">
-                <span>Khách hàng</span>
-                <input id="customer" name="customer" type="text" placeholder="Ví dụ: nữ 18-28 tuổi" autocomplete="off" />
-              </label>
-
-              <label class="field">
-                <span>Kênh bán</span>
-                <select id="channel" name="channel">
-                  <option value="TikTok Shop">TikTok Shop</option>
-                  <option value="Shopee">Shopee</option>
-                  <option value="Facebook">Facebook</option>
-                </select>
-              </label>
-            </div>
-
-            <label class="field">
-              <span>Vấn đề của khách</span>
-              <input id="painPoint" name="painPoint" type="text" placeholder="Ví dụ: muốn mặc đẹp nhưng sợ lộ bụng" autocomplete="off" />
-            </label>
-
-            <label class="field">
-              <span>Điểm nổi bật</span>
-              <input id="benefits" name="benefits" type="text" placeholder="Ví dụ: che dáng, chất mềm, dễ phối đồ" autocomplete="off" />
-            </label>
-
-            <div class="field-grid">
-              <label class="field">
-                <span>Tone nội dung</span>
-                <select id="tone" name="tone">
-                  <option value="friendly">Vui vẻ, gần gũi</option>
-                  <option value="premium">Chuyên nghiệp</option>
-                  <option value="trend">Bắt trend</option>
-                  <option value="short">Ngắn gọn</option>
-                </select>
-              </label>
-
-              <label class="field">
-                <span>Mức chi tiết</span>
-                <select id="detailLevel" name="detailLevel">
-                  <option value="balanced">Vừa đủ</option>
-                  <option value="short">Rất ngắn</option>
-                  <option value="rich">Nhiều ý</option>
-                </select>
-              </label>
-            </div>
-
-            <button type="submit" id="generateButton" class="generate-button">
-              <span>Tạo bộ nội dung</span>
-              <b>Generate</b>
-            </button>
-          </form>
-
-          <section class="output-panel" aria-live="polite">
-            <div class="panel-title">
-              <div>
-                <p class="eyebrow">Generated workspace</p>
-                <h2>Bộ nội dung có thể copy ngay</h2>
-              </div>
-              <button type="button" id="copyAll" class="text-button">Copy tất cả</button>
-            </div>
-
-            <div class="loading" id="loadingState" hidden>
-              <div class="loader"></div>
-              <span>Đang dựng caption, mô tả, hook và kịch bản...</span>
-            </div>
-
-            <div class="output-grid" id="outputGrid">
-              <article class="output-card highlight">
-                <div class="output-head">
-                  <div>
-                    <span class="tag">01</span>
-                    <strong>Caption TikTok/Facebook</strong>
-                  </div>
-                  <button type="button" class="copy-button" data-copy="captionOutput">Copy</button>
-                </div>
-                <pre id="captionOutput">Nhập sản phẩm rồi bấm "Tạo bộ nội dung".</pre>
-              </article>
-
-              <article class="output-card">
-                <div class="output-head">
-                  <div>
-                    <span class="tag">02</span>
-                    <strong>Mô tả Shopee</strong>
-                  </div>
-                  <button type="button" class="copy-button" data-copy="descriptionOutput">Copy</button>
-                </div>
-                <pre id="descriptionOutput">Mô tả sản phẩm sẽ nằm ở đây.</pre>
-              </article>
-
-              <article class="output-card">
-                <div class="output-head">
-                  <div>
-                    <span class="tag">03</span>
-                    <strong>Hook video</strong>
-                  </div>
-                  <button type="button" class="copy-button" data-copy="hooksOutput">Copy</button>
-                </div>
-                <pre id="hooksOutput">App sẽ gợi ý 3 câu mở đầu video.</pre>
-              </article>
-
-              <article class="output-card">
-                <div class="output-head">
-                  <div>
-                    <span class="tag">04</span>
-                    <strong>Kịch bản livestream</strong>
-                  </div>
-                  <button type="button" class="copy-button" data-copy="liveOutput">Copy</button>
-                </div>
-                <pre id="liveOutput">Kịch bản live ngắn sẽ nằm ở đây.</pre>
-              </article>
-            </div>
-          </section>
-        </section>
+      <section id="submit" class="submit-panel">
+        <div>
+          <p class="eyebrow">Seller request board</p>
+          <h2>Cho seller gửi vấn đề, mình biến thành template mới.</h2>
+          <p>
+            Đây là phần làm app khác một tool demo. Người dùng gửi ngành hàng và vấn đề họ hay bí,
+            mình gom dữ liệu để cập nhật template theo nhu cầu thật.
+          </p>
+        </div>
+        <form id="feedbackForm" class="feedback-form">
+          <label class="field">
+            <span>Ngành hàng</span>
+            <input name="category" type="text" placeholder="Ví dụ: skincare, thời trang, đồ gia dụng" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span>Bạn hay bí phần nào?</span>
+            <input name="pain" type="text" placeholder="Ví dụ: mở đầu video, mô tả Shopee, caption chốt đơn" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span>Email/Zalo nếu muốn nhận bản update</span>
+            <input name="contact" type="text" placeholder="Không bắt buộc" autocomplete="off" />
+          </label>
+          <button type="submit" class="generate-button">
+            <span>Gửi góp ý</span>
+            <b>Submit</b>
+          </button>
+        </form>
       </section>
     </main>
 
@@ -256,23 +421,30 @@ python server.py
 ```css
 :root {
   color-scheme: dark;
-  --bg: #06080c;
-  --surface: #0d1218;
-  --surface-2: #121922;
-  --surface-3: #17212b;
-  --line: rgba(255, 255, 255, 0.1);
-  --line-strong: rgba(255, 255, 255, 0.16);
+  --bg: #06080d;
+  --bg-2: #0b1118;
+  --panel: rgba(14, 20, 29, 0.82);
+  --panel-solid: #101722;
+  --panel-soft: rgba(255, 255, 255, 0.055);
+  --line: rgba(255, 255, 255, 0.12);
+  --line-strong: rgba(255, 255, 255, 0.22);
   --text: #f7fbff;
-  --muted: #95a3b3;
-  --mint: #2cf2a7;
-  --cyan: #35d7ff;
-  --yellow: #ffe15d;
-  --orange: #ff9a4d;
-  --shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+  --muted: #9dabba;
+  --soft: #d8e4ed;
+  --green: #20f5a6;
+  --cyan: #45d8ff;
+  --yellow: #fff06a;
+  --pink: #ff5fa2;
+  --orange: #ff9c55;
+  --shadow: 0 28px 90px rgba(0, 0, 0, 0.46);
 }
 
 * {
   box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
@@ -281,12 +453,21 @@ body {
   color: var(--text);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background:
-    linear-gradient(rgba(255, 255, 255, 0.026) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.026) 1px, transparent 1px),
-    radial-gradient(circle at 12% 12%, rgba(44, 242, 167, 0.16), transparent 30%),
-    radial-gradient(circle at 92% 8%, rgba(255, 154, 77, 0.13), transparent 28%),
-    var(--bg);
-  background-size: 42px 42px, 42px 42px, auto, auto, auto;
+    linear-gradient(120deg, rgba(32, 245, 166, 0.2), transparent 26%),
+    linear-gradient(240deg, rgba(255, 95, 162, 0.18), transparent 22%),
+    linear-gradient(180deg, #0b1118 0%, #05070b 38%, #070b10 100%);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: linear-gradient(to bottom, black, transparent 86%);
 }
 
 button,
@@ -299,33 +480,33 @@ button {
   cursor: pointer;
 }
 
-.product {
-  width: min(1440px, 100%);
-  min-height: 100vh;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
-.sidebar {
-  position: sticky;
-  top: 0;
-  height: 100vh;
+.site-header,
+main {
+  position: relative;
+  z-index: 1;
+  width: min(1240px, calc(100% - 36px));
+  margin: 0 auto;
+}
+
+.site-header {
+  min-height: 78px;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
   gap: 18px;
-  border-right: 1px solid var(--line);
-  background: rgba(7, 10, 15, 0.88);
-  backdrop-filter: blur(18px);
-  padding: 18px;
 }
 
 .brand,
-.topbar,
-.top-actions,
-.panel-title,
+.site-nav,
+.hero-actions,
+.card-head,
 .output-head,
-.usage-head,
+.workflow-list article,
 .quality-card > div:first-child {
   display: flex;
   align-items: center;
@@ -341,173 +522,122 @@ button {
   display: grid;
   place-items: center;
   border-radius: 14px;
-  color: #06110c;
-  background: linear-gradient(135deg, var(--mint), var(--cyan));
+  color: #06100c;
+  background: linear-gradient(135deg, var(--green), var(--cyan));
   font-weight: 950;
-  box-shadow: 0 0 34px rgba(44, 242, 167, 0.24);
+  box-shadow: 0 0 36px rgba(32, 245, 166, 0.28);
 }
 
 .brand strong,
-.brand span {
+.brand small,
+.metrics span,
+.metrics strong {
   display: block;
 }
 
-.brand strong {
-  font-size: 15px;
-}
-
-.brand span,
-.section-label,
-.usage-card p,
-.metrics span,
-.quality-card span {
+.brand small,
+.preview-panel span,
+.quality-card span,
+.template-card small,
+.workflow-list span,
+.insight-card p,
+.section-head p,
+.submit-panel p {
   color: var(--muted);
 }
 
-.brand span,
-.section-label,
-.usage-card p,
-.metrics span,
-.quality-card span,
-.output-head strong {
-  font-size: 13px;
+.brand small {
+  margin-top: 2px;
+  font-size: 12px;
 }
 
-.side-nav {
-  display: grid;
+.site-nav {
   gap: 8px;
 }
 
-.nav-item,
-.mini-history button,
-.text-button,
+.site-nav a,
+.ghost-button,
 .secondary-button,
+.text-button,
 .copy-button,
 .preset-row button {
   border: 1px solid var(--line);
   color: var(--text);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.055);
+  backdrop-filter: blur(12px);
 }
 
-.nav-item {
-  min-height: 42px;
-  display: flex;
+.site-nav a,
+.ghost-button {
+  min-height: 40px;
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  border-radius: 10px;
-  padding: 0 12px;
-  text-align: left;
-  font-weight: 800;
-}
-
-.nav-item span {
-  color: var(--mint);
-  font-size: 12px;
-}
-
-.nav-item.active {
-  color: #06110c;
-  background: var(--mint);
-}
-
-.nav-item.active span {
-  color: #06110c;
-}
-
-.usage-card,
-.mini-history,
-.brief-panel,
-.output-panel,
-.metrics article {
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: rgba(18, 25, 34, 0.78);
-  box-shadow: var(--shadow);
-}
-
-.usage-card {
-  padding: 14px;
-}
-
-.usage-head {
-  justify-content: space-between;
-  gap: 10px;
-  font-size: 13px;
-}
-
-.usage-head strong {
-  color: var(--mint);
-}
-
-.usage-bar,
-.quality-bar {
-  height: 8px;
-  overflow: hidden;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.usage-bar {
-  margin: 12px 0;
-}
-
-.usage-bar span,
-.quality-bar span {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--mint), var(--yellow));
-}
-
-.usage-bar span {
-  width: 38%;
-}
-
-.usage-card p {
-  margin: 0;
-  line-height: 1.45;
-}
-
-.mini-history {
-  display: grid;
-  gap: 8px;
-  padding: 14px;
-}
-
-.section-label {
+  padding: 0 14px;
   font-weight: 850;
-  text-transform: uppercase;
 }
 
-.mini-history button {
-  min-height: 38px;
-  border-radius: 10px;
-  padding: 0 10px;
-  text-align: left;
+.ghost-button {
+  color: var(--green);
 }
 
-.main-stage {
-  padding: 18px;
+.hero {
+  padding: 20px 0 18px;
 }
 
-.topbar {
-  justify-content: space-between;
+.hero-stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(480px, 1.05fr);
   gap: 18px;
-  min-height: 116px;
+  align-items: stretch;
+}
+
+.hero-copy,
+.hero-console,
+.template-hub,
+.studio-panel,
+.brief-card,
+.result-card,
+.submit-panel,
+.example-section,
+.hero-strip article {
   border: 1px solid var(--line);
-  border-radius: 16px;
-  background:
-    linear-gradient(135deg, rgba(44, 242, 167, 0.12), transparent 50%),
-    rgba(13, 18, 24, 0.88);
+  background: var(--panel);
   box-shadow: var(--shadow);
-  padding: 20px;
+  backdrop-filter: blur(22px);
+}
+
+.hero-copy {
+  position: relative;
+  overflow: hidden;
+  min-height: 590px;
+  border-radius: 30px;
+  padding: clamp(30px, 5vw, 60px);
+  background:
+    linear-gradient(135deg, rgba(32, 245, 166, 0.2), transparent 42%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.09), transparent 32%),
+    rgba(12, 18, 27, 0.9);
+}
+
+.hero-copy::before {
+  content: "SHOP CONTENT VN";
+  position: absolute;
+  left: 36px;
+  bottom: 28px;
+  color: rgba(255, 255, 255, 0.045);
+  font-size: clamp(58px, 7vw, 110px);
+  font-weight: 950;
+  line-height: 0.86;
+  max-width: 740px;
 }
 
 .eyebrow {
-  margin: 0 0 7px;
-  color: var(--mint);
+  margin: 0 0 12px;
+  color: var(--green);
   font-size: 12px;
   font-weight: 950;
+  letter-spacing: 0;
   text-transform: uppercase;
 }
 
@@ -523,89 +653,398 @@ h2 {
 }
 
 h1 {
-  max-width: 760px;
-  font-size: clamp(30px, 4vw, 48px);
-  line-height: 1.02;
+  position: relative;
+  max-width: 780px;
+  font-size: clamp(44px, 5vw, 68px);
+  line-height: 0.98;
 }
 
 h2 {
-  font-size: 20px;
+  font-size: 26px;
 }
 
-.top-actions {
+.hero-subtitle {
+  position: relative;
+  max-width: 680px;
+  margin: 22px 0 0;
+  color: var(--soft);
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+.hero-actions {
+  position: relative;
+  flex-wrap: wrap;
   gap: 10px;
+  margin-top: 30px;
 }
 
-.primary-button,
+.primary-link,
 .secondary-button,
-.text-button,
-.copy-button,
 .generate-button {
-  min-height: 40px;
-  border-radius: 10px;
-  font-weight: 900;
+  min-height: 56px;
+  border-radius: 15px;
+  font-weight: 950;
 }
 
-.primary-button,
+.primary-link,
 .generate-button {
   border: 0;
-  color: #06110c;
-  background: linear-gradient(135deg, var(--mint), var(--yellow));
+  color: #07110d;
+  background: linear-gradient(135deg, var(--green), var(--yellow));
+  box-shadow: 0 18px 46px rgba(32, 245, 166, 0.16);
 }
 
-.primary-button,
-.secondary-button,
-.text-button {
-  padding: 0 14px;
+.primary-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 22px;
 }
 
-.metrics {
+.secondary-button {
+  padding: 0 18px;
+}
+
+.hero-console {
+  overflow: hidden;
+  min-height: 590px;
+  border-radius: 30px;
+  background:
+    linear-gradient(145deg, rgba(69, 216, 255, 0.14), transparent 42%),
+    linear-gradient(315deg, rgba(255, 95, 162, 0.11), transparent 30%),
+    #090d13;
+}
+
+.console-top {
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--line);
+  padding: 0 18px;
+}
+
+.console-top span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--pink);
+}
+
+.console-top span:nth-child(2) {
+  background: var(--yellow);
+}
+
+.console-top span:nth-child(3) {
+  background: var(--green);
+}
+
+.console-top strong {
+  margin-left: 8px;
+  color: var(--soft);
+  font-size: 13px;
+}
+
+.console-body {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: 74px 1fr;
+  gap: 18px;
+  padding: 20px;
+}
+
+.console-rail {
+  display: grid;
   gap: 12px;
-  margin: 12px 0;
+  align-content: start;
 }
 
-.metrics article {
-  padding: 14px;
-  box-shadow: none;
+.console-rail b {
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  color: #06100c;
+  background: var(--green);
 }
 
-.metrics strong,
-.metrics span {
+.console-rail b:nth-child(2) {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.console-rail b:nth-child(3) {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.console-main {
+  display: grid;
+  gap: 16px;
+}
+
+.prompt-card,
+.mini-grid article {
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.065);
+}
+
+.prompt-card {
+  min-height: 230px;
+  padding: 24px;
+}
+
+.prompt-card span,
+.mini-grid span,
+.template-card em,
+.before-after-grid span,
+.insight-card span {
+  color: var(--green);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.prompt-card strong {
   display: block;
+  max-width: 520px;
+  margin-top: 14px;
+  font-size: clamp(30px, 4vw, 54px);
+  line-height: 0.96;
 }
 
-.metrics strong {
-  margin-top: 6px;
-  font-size: 20px;
+.prompt-card p,
+.mini-grid p {
+  color: var(--soft);
+  line-height: 1.6;
 }
 
-.workspace {
+.prompt-card p {
+  max-width: 520px;
+  font-size: 17px;
+}
+
+.mini-grid {
   display: grid;
-  grid-template-columns: minmax(340px, 420px) minmax(0, 1fr);
-  gap: 12px;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
 }
 
-.brief-panel,
-.output-panel {
+.mini-grid article {
+  min-height: 170px;
   padding: 18px;
 }
 
-.panel-title {
-  justify-content: space-between;
+.hero-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
-  margin-bottom: 14px;
+  margin-top: 14px;
+}
+
+.hero-strip article {
+  border-radius: 18px;
+  padding: 18px;
+}
+
+.hero-strip span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.hero-strip strong {
+  display: block;
+  margin-top: 7px;
+  font-size: 18px;
+}
+
+.template-hub,
+.submit-panel,
+.example-section {
+  border-radius: 28px;
+  padding: 28px;
+  margin: 18px 0;
+}
+
+.section-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+  gap: 20px;
+  align-items: end;
+  margin-bottom: 20px;
+}
+
+.section-head.compact {
+  grid-template-columns: 1fr;
+}
+
+.section-head h2,
+.submit-panel h2 {
+  max-width: 820px;
+  font-size: clamp(32px, 4.2vw, 56px);
+  line-height: 1.02;
+}
+
+.section-head p,
+.submit-panel p {
+  margin: 0;
+  line-height: 1.65;
+}
+
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.template-card {
+  min-height: 196px;
+  display: grid;
+  align-content: start;
+  gap: 11px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  color: var(--text);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.09), transparent 52%),
+    rgba(14, 20, 29, 0.92);
+  padding: 20px;
+  text-align: left;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.template-card:hover,
+.template-card.active {
+  transform: translateY(-3px);
+  border-color: rgba(32, 245, 166, 0.58);
+  background:
+    linear-gradient(135deg, rgba(32, 245, 166, 0.16), transparent 54%),
+    rgba(14, 20, 29, 0.98);
+}
+
+.template-index,
+.tag {
+  color: #06100c;
+  background: var(--green);
+  font-weight: 950;
+}
+
+.template-index {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.template-card strong {
+  font-size: 20px;
+}
+
+.template-card small {
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.template-card em {
+  color: var(--yellow);
+  text-transform: none;
+}
+
+.studio-shell {
+  display: grid;
+  grid-template-columns: 280px minmax(360px, 430px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+  margin: 18px 0;
+}
+
+.studio-panel,
+.brief-card,
+.result-card {
+  border-radius: 26px;
+  padding: 22px;
+}
+
+.panel-title {
+  margin-bottom: 18px;
+}
+
+.workflow-list {
+  display: grid;
+  gap: 10px;
+}
+
+.workflow-list article {
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.045);
+  padding: 13px;
+}
+
+.workflow-list article.active {
+  border-color: rgba(32, 245, 166, 0.5);
+  background: rgba(32, 245, 166, 0.09);
+}
+
+.workflow-list b {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 11px;
+  color: #06100c;
+  background: var(--yellow);
+}
+
+.workflow-list span,
+.insight-card p {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.insight-card {
+  margin-top: 16px;
+  border: 1px solid rgba(255, 240, 106, 0.26);
+  border-radius: 20px;
+  background: rgba(255, 240, 106, 0.07);
+  padding: 16px;
+}
+
+.insight-card strong {
+  display: block;
+  margin-top: 8px;
+  line-height: 1.25;
+}
+
+.card-head {
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.text-button,
+.copy-button {
+  min-height: 38px;
+  border-radius: 12px;
+  padding: 0 12px;
+  color: var(--green);
+  font-weight: 900;
 }
 
 .quality-card {
   display: grid;
-  gap: 10px;
-  border: 1px solid rgba(44, 242, 167, 0.2);
-  border-radius: 12px;
-  padding: 12px;
-  background: rgba(44, 242, 167, 0.06);
-  margin-bottom: 14px;
+  gap: 12px;
+  border: 1px solid rgba(32, 245, 166, 0.26);
+  border-radius: 18px;
+  padding: 15px;
+  background: rgba(32, 245, 166, 0.08);
+  margin-bottom: 16px;
 }
 
 .quality-card > div:first-child {
@@ -613,11 +1052,22 @@ h2 {
 }
 
 #briefQuality {
-  color: var(--mint);
+  color: var(--green);
+}
+
+.quality-bar {
+  height: 9px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .quality-bar span {
+  display: block;
   width: 42%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--green), var(--yellow));
   transition: width 180ms ease;
 }
 
@@ -625,62 +1075,54 @@ h2 {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .preset-row button {
-  min-height: 34px;
+  min-height: 38px;
   border-radius: 999px;
-  padding: 0 11px;
+  padding: 0 12px;
   font-size: 13px;
   font-weight: 850;
-}
-
-.preset-row button:hover,
-.mini-history button:hover,
-.secondary-button:hover,
-.text-button:hover,
-.copy-button:hover {
-  border-color: rgba(44, 242, 167, 0.45);
 }
 
 .field,
 .field-grid {
   display: grid;
-  gap: 8px;
+  gap: 9px;
 }
 
 .field {
-  margin-bottom: 13px;
+  margin-bottom: 16px;
 }
 
 .field-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  gap: 12px;
 }
 
 .field span {
-  color: #dce6ef;
-  font-size: 13px;
+  color: #ecf6fc;
+  font-size: 14px;
   font-weight: 850;
 }
 
 input,
 select {
   width: 100%;
-  min-height: 48px;
+  min-height: 54px;
   border: 1px solid var(--line-strong);
-  border-radius: 10px;
+  border-radius: 14px;
   color: var(--text);
-  background: rgba(6, 9, 13, 0.86);
+  background: rgba(5, 8, 12, 0.88);
   outline: none;
-  padding: 0 13px;
+  padding: 0 14px;
 }
 
 input:focus,
 select:focus {
-  border-color: var(--mint);
-  box-shadow: 0 0 0 4px rgba(44, 242, 167, 0.12);
+  border-color: var(--green);
+  box-shadow: 0 0 0 4px rgba(32, 245, 166, 0.13);
 }
 
 .generate-button {
@@ -688,13 +1130,13 @@ select:focus {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding: 0 14px;
-  margin-top: 2px;
+  gap: 12px;
+  padding: 0 18px;
+  font-size: 16px;
 }
 
 .generate-button b {
-  color: rgba(6, 17, 12, 0.7);
+  color: rgba(6, 16, 12, 0.7);
   font-size: 12px;
   text-transform: uppercase;
 }
@@ -703,20 +1145,20 @@ select:focus {
   display: flex;
   align-items: center;
   gap: 10px;
-  border: 1px solid rgba(44, 242, 167, 0.2);
-  border-radius: 12px;
+  border: 1px solid rgba(32, 245, 166, 0.24);
+  border-radius: 16px;
   color: #d8fff0;
-  background: rgba(44, 242, 167, 0.08);
-  padding: 12px;
-  margin-bottom: 12px;
+  background: rgba(32, 245, 166, 0.09);
+  padding: 13px;
+  margin-bottom: 14px;
   font-weight: 850;
 }
 
 .loader {
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-top-color: var(--mint);
+  border: 2px solid rgba(255, 255, 255, 0.22);
+  border-top-color: var(--green);
   border-radius: 50%;
   animation: spin 700ms linear infinite;
 }
@@ -729,29 +1171,28 @@ select:focus {
 
 .output-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: 1fr;
+  gap: 14px;
 }
 
 .output-card {
-  min-height: 286px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
   overflow: hidden;
-  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(16, 23, 34, 0.95);
 }
 
 .output-card.highlight {
   background:
-    linear-gradient(135deg, rgba(44, 242, 167, 0.1), transparent 45%),
-    var(--surface-2);
+    linear-gradient(135deg, rgba(32, 245, 166, 0.13), transparent 44%),
+    rgba(16, 23, 34, 0.98);
 }
 
 .output-head {
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
   border-bottom: 1px solid var(--line);
-  padding: 12px;
+  padding: 14px 15px;
 }
 
 .output-head > div {
@@ -760,43 +1201,79 @@ select:focus {
   gap: 10px;
 }
 
+.output-head strong {
+  font-size: 14px;
+}
+
 .tag {
   display: grid;
   place-items: center;
   width: 30px;
   height: 30px;
-  border-radius: 9px;
-  color: #06110c;
-  background: var(--mint);
+  border-radius: 10px;
   font-size: 12px;
-  font-weight: 950;
-}
-
-.copy-button {
-  min-height: 32px;
-  padding: 0 10px;
-  color: var(--mint);
 }
 
 pre {
   margin: 0;
-  min-height: 226px;
+  min-height: 190px;
   white-space: pre-wrap;
-  color: #edf6fb;
-  font: 550 14px/1.58 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  padding: 14px;
+  color: #f4fbff;
+  font: 560 14px/1.68 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  padding: 16px;
+}
+
+.before-after-grid {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr 1fr;
+  gap: 14px;
+}
+
+.before-after-grid article {
+  min-height: 170px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 20px;
+}
+
+.before-after-grid article.after {
+  border-color: rgba(32, 245, 166, 0.34);
+  background: rgba(32, 245, 166, 0.08);
+}
+
+.before-after-grid p {
+  color: var(--soft);
+  font-size: 17px;
+  line-height: 1.65;
+}
+
+.submit-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1fr);
+  gap: 22px;
+  align-items: start;
+  margin-bottom: 56px;
+}
+
+.feedback-form {
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.055);
+  padding: 18px;
 }
 
 #toast {
   position: fixed;
+  z-index: 3;
   left: 50%;
   bottom: 18px;
   transform: translateX(-50%) translateY(12px);
   opacity: 0;
   pointer-events: none;
   border-radius: 999px;
-  color: #06110c;
-  background: var(--mint);
+  color: #06100c;
+  background: var(--green);
   padding: 11px 16px;
   font-weight: 950;
   transition: 180ms ease;
@@ -807,55 +1284,94 @@ pre {
   transform: translateX(-50%) translateY(0);
 }
 
-@media (max-width: 1120px) {
-  .product {
+@media (max-width: 1160px) {
+  .hero-stage,
+  .studio-shell {
     grid-template-columns: 1fr;
   }
 
-  .sidebar {
-    position: static;
-    height: auto;
-    display: grid;
-    grid-template-columns: 1fr;
+  .hero-copy,
+  .hero-console {
+    min-height: auto;
   }
 
-  .side-nav,
-  .mini-history {
-    display: none;
-  }
-
-  .workspace {
+  .output-grid {
     grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 760px) {
-  .main-stage,
-  .sidebar {
-    padding: 10px;
+@media (max-width: 920px) {
+  .template-grid,
+  .hero-strip,
+  .before-after-grid,
+  .submit-panel,
+  .section-head {
+    grid-template-columns: 1fr;
   }
 
-  .topbar,
-  .top-actions,
-  .panel-title {
-    align-items: stretch;
+  .mini-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .site-header,
+  main {
+    width: min(100% - 20px, 1240px);
+  }
+
+  .site-header {
+    align-items: flex-start;
     flex-direction: column;
+    padding: 12px 0;
   }
 
-  .metrics,
-  .output-grid,
+  .site-nav {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .hero {
+    padding-top: 6px;
+  }
+
+  .hero-copy,
+  .hero-console,
+  .template-hub,
+  .studio-panel,
+  .brief-card,
+  .result-card,
+  .submit-panel,
+  .example-section {
+    border-radius: 20px;
+  }
+
+  .hero-copy,
+  .template-hub,
+  .studio-panel,
+  .brief-card,
+  .result-card,
+  .submit-panel,
+  .example-section {
+    padding: 18px;
+  }
+
+  h1 {
+    font-size: 42px;
+  }
+
+  .hero-subtitle {
+    font-size: 16px;
+  }
+
+  .console-body,
   .field-grid {
     grid-template-columns: 1fr;
   }
 
-  h1 {
-    font-size: 30px;
-  }
-
-  .primary-button,
-  .secondary-button,
-  .text-button {
-    width: 100%;
+  .console-rail {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 ```
@@ -864,6 +1380,7 @@ pre {
 
 ```javascript
 const form = document.querySelector("#generatorForm");
+const feedbackForm = document.querySelector("#feedbackForm");
 const fillDemoButton = document.querySelector("#fillDemo");
 const clearFormButton = document.querySelector("#clearForm");
 const copyAllButton = document.querySelector("#copyAll");
@@ -911,10 +1428,49 @@ const samples = {
   },
 };
 
+const templateBriefs = {
+  problem: {
+    painPoint: "khách muốn mua nhưng sợ chọn sai, phí tiền",
+    tone: "friendly",
+    detailLevel: "balanced",
+    benefits: "giải quyết đúng vấn đề, dễ hiểu, dễ tư vấn cho khách",
+  },
+  comparison: {
+    painPoint: "trước đây dùng chưa hợp, sau đó cần một lựa chọn dễ dùng hơn",
+    tone: "trend",
+    detailLevel: "balanced",
+    benefits: "thấy khác biệt rõ, dễ dùng mỗi ngày, phù hợp nhu cầu thật",
+  },
+  threeReasons: {
+    painPoint: "không biết sản phẩm này có đáng mua không",
+    tone: "premium",
+    detailLevel: "rich",
+    benefits: "lợi ích rõ, dễ so sánh, đáng cân nhắc trước khi mua",
+  },
+  livestream: {
+    painPoint: "xem live nhưng chưa hiểu sản phẩm có hợp với mình không",
+    tone: "friendly",
+    detailLevel: "rich",
+    benefits: "dễ giới thiệu trên live, dễ chốt lợi ích, có CTA rõ",
+  },
+  shopee: {
+    painPoint: "đọc mô tả Shopee nhưng vẫn chưa hiểu điểm nổi bật",
+    tone: "premium",
+    detailLevel: "rich",
+    benefits: "mô tả rõ ràng, dễ đọc, có đủ điểm nổi bật và lưu ý",
+  },
+  comment: {
+    painPoint: "khách xem xong nhưng không biết nên hỏi gì tiếp",
+    tone: "short",
+    detailLevel: "short",
+    benefits: "CTA rõ, dễ kéo comment, dễ tư vấn size màu giá",
+  },
+};
+
 const toneMap = {
   friendly: {
     opener: "Nói thật, nếu bạn đang tìm một món dễ dùng hằng ngày thì nên xem thử",
-    cta: "Comment \"mình cần\" để shop tư vấn mẫu phù hợp nha.",
+    cta: 'Comment "mình cần" để shop tư vấn mẫu phù hợp nha.',
     style: "gần gũi, dễ đọc",
   },
   premium: {
@@ -1019,6 +1575,42 @@ const renderContent = (content) => {
   outputs.live.textContent = content.live;
 };
 
+const showToast = (message) => {
+  toast.textContent = message;
+  toast.classList.add("show");
+  window.setTimeout(() => toast.classList.remove("show"), 1500);
+};
+
+const updateBriefQuality = () => {
+  const fields = ["productName", "customer", "painPoint", "benefits"];
+  const filled = fields.filter((key) => normalize(form.elements[key]?.value, "")).length;
+  const width = 24 + filled * 19;
+  briefQualityBar.style.width = `${Math.min(width, 100)}%`;
+
+  if (filled <= 1) briefQuality.textContent = "Cần thêm thông tin";
+  if (filled === 2) briefQuality.textContent = "Tạm ổn";
+  if (filled === 3) briefQuality.textContent = "Tốt";
+  if (filled >= 4) briefQuality.textContent = "Rất tốt";
+};
+
+const simulateGenerate = async () => {
+  const input = getFormData();
+  loadingState.hidden = false;
+  outputGrid.style.opacity = "0.45";
+
+  try {
+    const content = await generateWithApi(input);
+    renderContent(content);
+    showToast("Đã tạo bằng AI");
+  } catch (error) {
+    renderContent(buildContent(input));
+    showToast("Đang chạy bản demo");
+  } finally {
+    loadingState.hidden = true;
+    outputGrid.style.opacity = "1";
+  }
+};
+
 const fillSample = (sample) => {
   Object.entries(sample).forEach(([key, value]) => {
     if (form.elements[key]) form.elements[key].value = value;
@@ -1027,10 +1619,33 @@ const fillSample = (sample) => {
   simulateGenerate();
 };
 
-const showToast = (message) => {
-  toast.textContent = message;
-  toast.classList.add("show");
-  window.setTimeout(() => toast.classList.remove("show"), 1500);
+const applyTemplate = (templateKey) => {
+  const template = templateBriefs[templateKey];
+  if (!template) return;
+
+  Object.entries(template).forEach(([key, value]) => {
+    if (form.elements[key]) form.elements[key].value = value;
+  });
+
+  document.querySelectorAll("[data-template]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.template === templateKey);
+  });
+
+  updateBriefQuality();
+  showToast("Đã chọn template");
+};
+
+const sendFeedback = async (payload) => {
+  const response = await fetch("/api/feedback", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) throw new Error(`Feedback failed: ${response.status}`);
+  return response.json();
 };
 
 const copyText = async (text) => {
@@ -1065,36 +1680,6 @@ const getAllOutput = () =>
     outputs.live.textContent,
   ].join("\n");
 
-const updateBriefQuality = () => {
-  const fields = ["productName", "customer", "painPoint", "benefits"];
-  const filled = fields.filter((key) => normalize(form.elements[key]?.value, "")).length;
-  const width = 24 + filled * 19;
-  briefQualityBar.style.width = `${Math.min(width, 100)}%`;
-
-  if (filled <= 1) briefQuality.textContent = "Cần thêm thông tin";
-  if (filled === 2) briefQuality.textContent = "Tạm ổn";
-  if (filled === 3) briefQuality.textContent = "Tốt";
-  if (filled >= 4) briefQuality.textContent = "Rất tốt";
-};
-
-const simulateGenerate = async () => {
-  const input = getFormData();
-  loadingState.hidden = false;
-  outputGrid.style.opacity = "0.45";
-
-  try {
-    const content = await generateWithApi(input);
-    renderContent(content);
-    showToast("Đã tạo bằng AI");
-  } catch (error) {
-    renderContent(buildContent(input));
-    showToast("Đang chạy bản demo");
-  } finally {
-    loadingState.hidden = true;
-    outputGrid.style.opacity = "1";
-  }
-};
-
 form.addEventListener("input", updateBriefQuality);
 
 form.addEventListener("submit", (event) => {
@@ -1108,7 +1693,7 @@ clearFormButton.addEventListener("click", () => {
   form.reset();
   outputs.caption.textContent = 'Nhập sản phẩm rồi bấm "Tạo bộ nội dung".';
   outputs.description.textContent = "Mô tả sản phẩm sẽ nằm ở đây.";
-  outputs.hooks.textContent = "App sẽ gợi ý 3 câu mở đầu video.";
+  outputs.hooks.textContent = "App sẽ gợi ý 3-5 câu mở đầu video.";
   outputs.live.textContent = "Kịch bản live ngắn sẽ nằm ở đây.";
   updateBriefQuality();
   showToast("Đã reset");
@@ -1116,6 +1701,10 @@ clearFormButton.addEventListener("click", () => {
 
 document.querySelectorAll("[data-sample]").forEach((button) => {
   button.addEventListener("click", () => fillSample(samples[button.dataset.sample]));
+});
+
+document.querySelectorAll("[data-template]").forEach((button) => {
+  button.addEventListener("click", () => applyTemplate(button.dataset.template));
 });
 
 document.querySelectorAll(".copy-button").forEach((button) => {
@@ -1128,6 +1717,31 @@ document.querySelectorAll(".copy-button").forEach((button) => {
 copyAllButton.addEventListener("click", () => copyText(getAllOutput()));
 copyAllTopButton.addEventListener("click", () => copyText(getAllOutput()));
 
+if (feedbackForm) {
+  feedbackForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const data = new FormData(feedbackForm);
+    const payload = {
+      category: normalize(data.get("category"), ""),
+      pain: normalize(data.get("pain"), ""),
+      contact: normalize(data.get("contact"), ""),
+    };
+
+    if (!payload.category && !payload.pain) {
+      showToast("Nhập ngành hoặc vấn đề");
+      return;
+    }
+
+    try {
+      await sendFeedback(payload);
+      feedbackForm.reset();
+      showToast("Đã gửi góp ý");
+    } catch (error) {
+      showToast("Đã ghi nhận demo");
+    }
+  });
+}
+
 updateBriefQuality();
 ```
 
@@ -1135,6 +1749,8 @@ updateBriefQuality();
 
 ```python
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+import csv
+from datetime import datetime, timezone
 import json
 import os
 from pathlib import Path
@@ -1144,23 +1760,24 @@ import urllib.request
 
 APP_DIR = Path(__file__).resolve().parent
 MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+FEEDBACK_PATH = APP_DIR / "feedback.csv"
 
 
 SYSTEM_PROMPT = """
-Ban la chuyen gia content cho seller Viet ban hang tren Shopee, TikTok Shop va Facebook.
-Nhiem vu: tao noi dung ban hang ro rang, de copy, dung tieng Viet tu nhien.
-Khong noi chung chung. Khong bia thong so san pham. Khong hua hen qua da.
-Output bat buoc la JSON hop le voi 4 key: caption, description, hooks, live.
-Moi value la string tieng Viet.
+Bạn là chuyên gia content cho seller Việt bán hàng trên Shopee, TikTok Shop và Facebook.
+Nhiệm vụ: tạo nội dung bán hàng rõ ràng, dễ copy, dùng tiếng Việt tự nhiên.
+Không nói chung chung. Không bịa thông số sản phẩm. Không hứa hẹn quá đà.
+Output bắt buộc là JSON hợp lệ với 4 key: caption, description, hooks, live.
+Mỗi value là string tiếng Việt.
 """.strip()
 
 
 def fallback_content(payload):
-    product = payload.get("product") or "san pham cua shop"
-    customer = payload.get("customer") or "khach mua online"
-    pain = payload.get("pain") or "muon chon nhanh nhung so mua khong hop"
+    product = payload.get("product") or "sản phẩm của shop"
+    customer = payload.get("customer") or "khách mua online"
+    pain = payload.get("pain") or "muốn chọn nhanh nhưng sợ mua không hợp"
     channel = payload.get("channel") or "TikTok Shop"
-    benefits = payload.get("benefits") or "de dung, dep, hop nhu cau hang ngay"
+    benefits = payload.get("benefits") or "dễ dùng, đẹp, hợp nhu cầu hằng ngày"
 
     parts = [item.strip() for item in benefits.replace(";", ",").split(",") if item.strip()]
     bullet_lines = "\n".join(f"- {item[:1].upper() + item[1:]}" for item in parts[:5])
@@ -1168,28 +1785,28 @@ def fallback_content(payload):
 
     return {
         "caption": (
-            f"Neu ban dang {pain}, xem thu {product}.\n\n"
-            f"Diem dang chu y:\n{bullet_lines}\n\n"
-            f"Phu hop cho: {customer}.\n\n"
-            "Comment \"minh can\" de shop tu van mau phu hop."
+            f"Nếu bạn đang {pain}, xem thử {product}.\n\n"
+            f"Điểm đáng chú ý:\n{bullet_lines}\n\n"
+            f"Phù hợp cho: {customer}.\n\n"
+            "Comment \"mình cần\" để shop tư vấn mẫu phù hợp."
         ),
         "description": (
             f"{product[:1].upper() + product[1:]}\n\n"
-            f"Phu hop cho {customer}. San pham tap trung vao nhu cau: {pain}.\n\n"
-            f"Diem noi bat:\n{bullet_lines}\n\n"
-            "Shop nen bo sung size, mau, chat lieu, hinh that va chinh sach doi tra neu co."
+            f"Phù hợp cho {customer}. Sản phẩm tập trung vào nhu cầu: {pain}.\n\n"
+            f"Điểm nổi bật:\n{bullet_lines}\n\n"
+            "Shop nên bổ sung size, màu, chất liệu, hình thật và chính sách đổi trả nếu có."
         ),
         "hooks": (
-            f"1. Neu ban dang {pain}, xem thu {product} nay.\n\n"
-            f"2. 3 ly do {customer} nen can nhac {product}: {first_benefit}.\n\n"
-            f"3. Dung chon {product} chi vi re. Hay nhin vao loi ich that truoc."
+            f"1. Nếu bạn đang {pain}, xem thử {product} này.\n\n"
+            f"2. 3 lý do {customer} nên cân nhắc {product}: {first_benefit}.\n\n"
+            f"3. Đừng chọn {product} chỉ vì rẻ. Hãy nhìn vào lợi ích thật trước."
         ),
         "live": (
-            f"Kich ban live ngan cho {channel}\n\n"
-            f"1. Mo live: Ai dang tim {product} thi o lai 30 giay.\n\n"
-            f"2. Goi van de: Nhieu ban {pain}, nen chon sai rat de phi tien.\n\n"
-            f"3. Gioi thieu: Mau nay hop voi {customer}, noi bat o {benefits}.\n\n"
-            "4. CTA: Comment so 1 de shop gui thong tin va mau phu hop."
+            f"Kịch bản live ngắn cho {channel}\n\n"
+            f"1. Mở live: Ai đang tìm {product} thì ở lại 30 giây.\n\n"
+            f"2. Gọi vấn đề: Nhiều bạn {pain}, nên chọn sai rất dễ phí tiền.\n\n"
+            f"3. Giới thiệu: Mẫu này hợp với {customer}, nổi bật ở {benefits}.\n\n"
+            "4. CTA: Comment số 1 để shop gửi thông tin và mẫu phù hợp."
         ),
     }
 
@@ -1266,18 +1883,41 @@ def call_openai(payload):
     return parsed, "openai"
 
 
+def save_feedback(payload):
+    row = {
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "category": str(payload.get("category") or "").strip(),
+        "pain": str(payload.get("pain") or "").strip(),
+        "contact": str(payload.get("contact") or "").strip(),
+    }
+
+    is_new = not FEEDBACK_PATH.exists()
+    with FEEDBACK_PATH.open("a", newline="", encoding="utf-8") as file:
+        writer = csv.DictWriter(file, fieldnames=row.keys())
+        if is_new:
+            writer.writeheader()
+        writer.writerow(row)
+
+    return {"saved": True}
+
+
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(APP_DIR), **kwargs)
 
     def do_POST(self):
-        if self.path != "/api/generate":
+        if self.path not in ("/api/generate", "/api/feedback"):
             self.send_error(404)
             return
 
         try:
             length = int(self.headers.get("Content-Length", "0"))
             payload = json.loads(self.rfile.read(length).decode("utf-8"))
+
+            if self.path == "/api/feedback":
+                self.respond_json(save_feedback(payload))
+                return
+
             content, mode = call_openai(payload)
             self.respond_json({"mode": mode, "content": content})
         except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, json.JSONDecodeError) as error:
