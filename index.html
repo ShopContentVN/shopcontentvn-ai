@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ShopContentVN AI</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="product">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-logo">SC</div>
+          <div>
+            <strong>ShopContentVN</strong>
+            <span>AI Studio</span>
+          </div>
+        </div>
+
+        <nav class="side-nav" aria-label="Điều hướng">
+          <button class="nav-item active" type="button"><span>01</span> Content Studio</button>
+          <button class="nav-item" type="button"><span>02</span> Templates</button>
+          <button class="nav-item" type="button"><span>03</span> History</button>
+        </nav>
+
+        <div class="usage-card">
+          <div class="usage-head">
+            <span>Beta usage</span>
+            <strong>Free</strong>
+          </div>
+          <div class="usage-bar"><span></span></div>
+          <p>Demo MVP chưa tốn phí. Bản sau sẽ gắn AI thật và giới hạn lượt dùng.</p>
+        </div>
+
+        <div class="mini-history">
+          <div class="section-label">Gần đây</div>
+          <button type="button" data-sample="shirt">Áo thun nữ form rộng</button>
+          <button type="button" data-sample="sunscreen">Kem chống nắng da dầu</button>
+          <button type="button" data-sample="lamp">Đèn livestream để bàn</button>
+        </div>
+      </aside>
+
+      <section class="main-stage">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">AI content kit cho seller Việt</p>
+            <h1>Tạo bộ nội dung bán hàng từ một sản phẩm.</h1>
+          </div>
+          <div class="top-actions">
+            <button type="button" id="fillDemo" class="secondary-button">Điền mẫu</button>
+            <button type="button" id="copyAllTop" class="primary-button">Copy tất cả</button>
+          </div>
+        </header>
+
+        <section class="metrics">
+          <article>
+            <span>Output</span>
+            <strong>4 định dạng</strong>
+          </article>
+          <article>
+            <span>Kênh bán</span>
+            <strong>Shopee / TikTok</strong>
+          </article>
+          <article>
+            <span>Thời gian</span>
+            <strong>&lt; 30 giây</strong>
+          </article>
+        </section>
+
+        <section class="workspace">
+          <form id="generatorForm" class="brief-panel">
+            <div class="panel-title">
+              <div>
+                <p class="eyebrow">Product brief</p>
+                <h2>Thông tin đầu vào</h2>
+              </div>
+              <button type="button" id="clearForm" class="text-button">Reset</button>
+            </div>
+
+            <div class="quality-card">
+              <div>
+                <span>Brief quality</span>
+                <strong id="briefQuality">Sẵn sàng</strong>
+              </div>
+              <div class="quality-bar"><span id="briefQualityBar"></span></div>
+            </div>
+
+            <div class="preset-row" aria-label="Sản phẩm mẫu">
+              <button type="button" data-sample="shirt">Áo thun nữ</button>
+              <button type="button" data-sample="sunscreen">Kem chống nắng</button>
+              <button type="button" data-sample="lamp">Đèn livestream</button>
+            </div>
+
+            <label class="field">
+              <span>Tên sản phẩm</span>
+              <input id="productName" name="productName" type="text" placeholder="Ví dụ: áo thun nữ form rộng" required autocomplete="off" />
+            </label>
+
+            <div class="field-grid">
+              <label class="field">
+                <span>Khách hàng</span>
+                <input id="customer" name="customer" type="text" placeholder="Ví dụ: nữ 18-28 tuổi" autocomplete="off" />
+              </label>
+
+              <label class="field">
+                <span>Kênh bán</span>
+                <select id="channel" name="channel">
+                  <option value="TikTok Shop">TikTok Shop</option>
+                  <option value="Shopee">Shopee</option>
+                  <option value="Facebook">Facebook</option>
+                </select>
+              </label>
+            </div>
+
+            <label class="field">
+              <span>Vấn đề của khách</span>
+              <input id="painPoint" name="painPoint" type="text" placeholder="Ví dụ: muốn mặc đẹp nhưng sợ lộ bụng" autocomplete="off" />
+            </label>
+
+            <label class="field">
+              <span>Điểm nổi bật</span>
+              <input id="benefits" name="benefits" type="text" placeholder="Ví dụ: che dáng, chất mềm, dễ phối đồ" autocomplete="off" />
+            </label>
+
+            <div class="field-grid">
+              <label class="field">
+                <span>Tone nội dung</span>
+                <select id="tone" name="tone">
+                  <option value="friendly">Vui vẻ, gần gũi</option>
+                  <option value="premium">Chuyên nghiệp</option>
+                  <option value="trend">Bắt trend</option>
+                  <option value="short">Ngắn gọn</option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span>Mức chi tiết</span>
+                <select id="detailLevel" name="detailLevel">
+                  <option value="balanced">Vừa đủ</option>
+                  <option value="short">Rất ngắn</option>
+                  <option value="rich">Nhiều ý</option>
+                </select>
+              </label>
+            </div>
+
+            <button type="submit" id="generateButton" class="generate-button">
+              <span>Tạo bộ nội dung</span>
+              <b>Generate</b>
+            </button>
+          </form>
+
+          <section class="output-panel" aria-live="polite">
+            <div class="panel-title">
+              <div>
+                <p class="eyebrow">Generated workspace</p>
+                <h2>Bộ nội dung có thể copy ngay</h2>
+              </div>
+              <button type="button" id="copyAll" class="text-button">Copy tất cả</button>
+            </div>
+
+            <div class="loading" id="loadingState" hidden>
+              <div class="loader"></div>
+              <span>Đang dựng caption, mô tả, hook và kịch bản...</span>
+            </div>
+
+            <div class="output-grid" id="outputGrid">
+              <article class="output-card highlight">
+                <div class="output-head">
+                  <div>
+                    <span class="tag">01</span>
+                    <strong>Caption TikTok/Facebook</strong>
+                  </div>
+                  <button type="button" class="copy-button" data-copy="captionOutput">Copy</button>
+                </div>
+                <pre id="captionOutput">Nhập sản phẩm rồi bấm "Tạo bộ nội dung".</pre>
+              </article>
+
+              <article class="output-card">
+                <div class="output-head">
+                  <div>
+                    <span class="tag">02</span>
+                    <strong>Mô tả Shopee</strong>
+                  </div>
+                  <button type="button" class="copy-button" data-copy="descriptionOutput">Copy</button>
+                </div>
+                <pre id="descriptionOutput">Mô tả sản phẩm sẽ nằm ở đây.</pre>
+              </article>
+
+              <article class="output-card">
+                <div class="output-head">
+                  <div>
+                    <span class="tag">03</span>
+                    <strong>Hook video</strong>
+                  </div>
+                  <button type="button" class="copy-button" data-copy="hooksOutput">Copy</button>
+                </div>
+                <pre id="hooksOutput">App sẽ gợi ý 3 câu mở đầu video.</pre>
+              </article>
+
+              <article class="output-card">
+                <div class="output-head">
+                  <div>
+                    <span class="tag">04</span>
+                    <strong>Kịch bản livestream</strong>
+                  </div>
+                  <button type="button" class="copy-button" data-copy="liveOutput">Copy</button>
+                </div>
+                <pre id="liveOutput">Kịch bản live ngắn sẽ nằm ở đây.</pre>
+              </article>
+            </div>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <div id="toast" role="status" aria-live="polite"></div>
+    <script src="./app.js"></script>
+  </body>
+</html>
