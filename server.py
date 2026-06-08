@@ -1,4 +1,6 @@
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+import csv
+from datetime import datetime, timezone
 import json
 import os
 from pathlib import Path
@@ -8,6 +10,7 @@ import urllib.request
 
 APP_DIR = Path(__file__).resolve().parent
 MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+FEEDBACK_PATH = APP_DIR / "feedback.csv"
 
 
 SYSTEM_PROMPT = """
@@ -130,18 +133,41 @@ def call_openai(payload):
     return parsed, "openai"
 
 
+def save_feedback(payload):
+    row = {
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "category": str(payload.get("category") or "").strip(),
+        "pain": str(payload.get("pain") or "").strip(),
+        "contact": str(payload.get("contact") or "").strip(),
+    }
+
+    is_new = not FEEDBACK_PATH.exists()
+    with FEEDBACK_PATH.open("a", newline="", encoding="utf-8") as file:
+        writer = csv.DictWriter(file, fieldnames=row.keys())
+        if is_new:
+            writer.writeheader()
+        writer.writerow(row)
+
+    return {"saved": True}
+
+
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(APP_DIR), **kwargs)
 
     def do_POST(self):
-        if self.path != "/api/generate":
+        if self.path not in ("/api/generate", "/api/feedback"):
             self.send_error(404)
             return
 
         try:
             length = int(self.headers.get("Content-Length", "0"))
             payload = json.loads(self.rfile.read(length).decode("utf-8"))
+
+            if self.path == "/api/feedback":
+                self.respond_json(save_feedback(payload))
+                return
+
             content, mode = call_openai(payload)
             self.respond_json({"mode": mode, "content": content})
         except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, json.JSONDecodeError) as error:

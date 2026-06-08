@@ -17,8 +17,9 @@
         </span>
       </a>
       <nav class="site-nav" aria-label="Điều hướng">
+        <a href="#templates">Template Hub</a>
         <a href="#tool">Dùng thử</a>
-        <a href="#examples">Mẫu ngành</a>
+        <a href="#submit">Gửi ý tưởng</a>
         <button type="button" id="copyAllTop" class="ghost-button">Copy tất cả</button>
       </nav>
     </header>
@@ -27,10 +28,10 @@
       <section class="hero">
         <div class="hero-copy">
           <p class="eyebrow">Beta miễn phí cho seller Việt</p>
-          <h1>Viết content bán hàng nhanh hơn trong vài giây.</h1>
+          <h1>Kho template + AI content cho seller Việt.</h1>
           <p class="hero-subtitle">
-            Nhập tên sản phẩm, khách hàng và điểm nổi bật. ShopContentVN tạo caption, mô tả Shopee,
-            hook video và kịch bản livestream để bạn copy dùng ngay.
+            Chọn template theo tình huống bán hàng, nhập sản phẩm, rồi tạo caption, mô tả Shopee,
+            hook video và kịch bản livestream để copy dùng ngay.
           </p>
           <div class="hero-actions">
             <a class="primary-link" href="#tool">Tạo nội dung ngay</a>
@@ -56,8 +57,8 @@
 
       <section class="metrics" aria-label="Tóm tắt sản phẩm">
         <article>
-          <span>Output</span>
-          <strong>4 định dạng</strong>
+          <span>Template</span>
+          <strong>8 khung mở đầu</strong>
         </article>
         <article>
           <span>Kênh bán</span>
@@ -67,6 +68,49 @@
           <span>Tốc độ</span>
           <strong>Dưới 30 giây</strong>
         </article>
+      </section>
+
+      <section id="templates" class="template-hub">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Template Hub</p>
+            <h2>Chọn tình huống trước, rồi để AI viết lại theo sản phẩm.</h2>
+          </div>
+          <p>Không bắt seller nghĩ từ trang trắng. Chọn khung phù hợp, nhập sản phẩm, lấy nội dung đem đăng.</p>
+        </div>
+
+        <div class="template-grid" aria-label="Thư viện template">
+          <button type="button" class="template-card active" data-template="problem">
+            <span>01</span>
+            <strong>Mở bằng vấn đề</strong>
+            <small>Cho sản phẩm cần đánh đúng nỗi đau của khách.</small>
+          </button>
+          <button type="button" class="template-card" data-template="comparison">
+            <span>02</span>
+            <strong>So sánh trước/sau</strong>
+            <small>Hợp video TikTok, skincare, thời trang, đồ gia dụng.</small>
+          </button>
+          <button type="button" class="template-card" data-template="threeReasons">
+            <span>03</span>
+            <strong>3 lý do nên mua</strong>
+            <small>Gọn, rõ lợi ích, dễ dùng cho caption và mô tả.</small>
+          </button>
+          <button type="button" class="template-card" data-template="livestream">
+            <span>04</span>
+            <strong>Livestream chốt đơn</strong>
+            <small>Mở live, gọi vấn đề, chốt lợi ích, CTA.</small>
+          </button>
+          <button type="button" class="template-card" data-template="shopee">
+            <span>05</span>
+            <strong>Mô tả Shopee rõ ràng</strong>
+            <small>Cho shop cần mô tả bớt khô và dễ đọc hơn.</small>
+          </button>
+          <button type="button" class="template-card" data-template="comment">
+            <span>06</span>
+            <strong>Câu kéo comment</strong>
+            <small>Gợi ý CTA để khách hỏi size, màu, giá, mẫu.</small>
+          </button>
+        </div>
       </section>
 
       <section id="tool" class="tool-shell">
@@ -211,6 +255,35 @@
             </article>
           </div>
         </section>
+      </section>
+
+      <section id="submit" class="submit-panel">
+        <div>
+          <p class="eyebrow">Seller request board</p>
+          <h2>Gửi ngành hàng hoặc vấn đề bạn hay bí.</h2>
+          <p>
+            Mỗi góp ý sẽ giúp ShopContentVN biết seller cần template gì nhất.
+            Đây là dữ liệu để biến app thành kho template thật, không phải form generate một lần.
+          </p>
+        </div>
+        <form id="feedbackForm" class="feedback-form">
+          <label class="field">
+            <span>Ngành hàng</span>
+            <input name="category" type="text" placeholder="Ví dụ: skincare, thời trang, đồ gia dụng" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span>Bạn hay bí phần nào?</span>
+            <input name="pain" type="text" placeholder="Ví dụ: mở đầu video, mô tả Shopee, caption chốt đơn" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span>Email/Zalo nếu muốn nhận bản update</span>
+            <input name="contact" type="text" placeholder="Không bắt buộc" autocomplete="off" />
+          </label>
+          <button type="submit" class="generate-button">
+            <span>Gửi góp ý</span>
+            <b>Submit</b>
+          </button>
+        </form>
       </section>
     </main>
 

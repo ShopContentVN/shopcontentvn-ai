@@ -1,4 +1,5 @@
 const form = document.querySelector("#generatorForm");
+const feedbackForm = document.querySelector("#feedbackForm");
 const fillDemoButton = document.querySelector("#fillDemo");
 const clearFormButton = document.querySelector("#clearForm");
 const copyAllButton = document.querySelector("#copyAll");
@@ -43,6 +44,45 @@ const samples = {
     tone: "trend",
     detailLevel: "balanced",
     benefits: "ánh sáng đều, dễ chỉnh góc, gọn bàn, hợp quay video bán hàng",
+  },
+};
+
+const templateBriefs = {
+  problem: {
+    painPoint: "khách muốn mua nhưng sợ chọn sai, phí tiền",
+    tone: "friendly",
+    detailLevel: "balanced",
+    benefits: "giải quyết đúng vấn đề, dễ hiểu, dễ tư vấn cho khách",
+  },
+  comparison: {
+    painPoint: "trước đây dùng chưa hợp, sau đó cần một lựa chọn dễ dùng hơn",
+    tone: "trend",
+    detailLevel: "balanced",
+    benefits: "thấy khác biệt rõ, dễ dùng mỗi ngày, phù hợp nhu cầu thật",
+  },
+  threeReasons: {
+    painPoint: "không biết sản phẩm này có đáng mua không",
+    tone: "premium",
+    detailLevel: "rich",
+    benefits: "lợi ích rõ, dễ so sánh, đáng cân nhắc trước khi mua",
+  },
+  livestream: {
+    painPoint: "xem live nhưng chưa hiểu sản phẩm có hợp với mình không",
+    tone: "friendly",
+    detailLevel: "rich",
+    benefits: "dễ giới thiệu trên live, dễ chốt lợi ích, có CTA rõ",
+  },
+  shopee: {
+    painPoint: "đọc mô tả Shopee nhưng vẫn chưa hiểu điểm nổi bật",
+    tone: "premium",
+    detailLevel: "rich",
+    benefits: "mô tả rõ ràng, dễ đọc, có đủ điểm nổi bật và lưu ý",
+  },
+  comment: {
+    painPoint: "khách xem xong nhưng không biết nên hỏi gì tiếp",
+    tone: "short",
+    detailLevel: "short",
+    benefits: "CTA rõ, dễ kéo comment, dễ tư vấn size màu giá",
   },
 };
 
@@ -168,6 +208,35 @@ const showToast = (message) => {
   window.setTimeout(() => toast.classList.remove("show"), 1500);
 };
 
+const applyTemplate = (templateKey) => {
+  const template = templateBriefs[templateKey];
+  if (!template) return;
+
+  Object.entries(template).forEach(([key, value]) => {
+    if (form.elements[key]) form.elements[key].value = value;
+  });
+
+  document.querySelectorAll("[data-template]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.template === templateKey);
+  });
+
+  updateBriefQuality();
+  showToast("Đã chọn template");
+};
+
+const sendFeedback = async (payload) => {
+  const response = await fetch("/api/feedback", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) throw new Error(`Feedback failed: ${response.status}`);
+  return response.json();
+};
+
 const copyText = async (text) => {
   try {
     await navigator.clipboard.writeText(text);
@@ -253,6 +322,10 @@ document.querySelectorAll("[data-sample]").forEach((button) => {
   button.addEventListener("click", () => fillSample(samples[button.dataset.sample]));
 });
 
+document.querySelectorAll("[data-template]").forEach((button) => {
+  button.addEventListener("click", () => applyTemplate(button.dataset.template));
+});
+
 document.querySelectorAll(".copy-button").forEach((button) => {
   button.addEventListener("click", () => {
     const target = document.querySelector(`#${button.dataset.copy}`);
@@ -262,5 +335,30 @@ document.querySelectorAll(".copy-button").forEach((button) => {
 
 copyAllButton.addEventListener("click", () => copyText(getAllOutput()));
 copyAllTopButton.addEventListener("click", () => copyText(getAllOutput()));
+
+if (feedbackForm) {
+  feedbackForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const data = new FormData(feedbackForm);
+    const payload = {
+      category: normalize(data.get("category"), ""),
+      pain: normalize(data.get("pain"), ""),
+      contact: normalize(data.get("contact"), ""),
+    };
+
+    if (!payload.category && !payload.pain) {
+      showToast("Nhập ngành hoặc vấn đề");
+      return;
+    }
+
+    try {
+      await sendFeedback(payload);
+      feedbackForm.reset();
+      showToast("Đã gửi góp ý");
+    } catch (error) {
+      showToast("Đã ghi nhận demo");
+    }
+  });
+}
 
 updateBriefQuality();
