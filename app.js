@@ -25,6 +25,15 @@ const variantDots = document.querySelector("#variantDots");
 const previousVariant = document.querySelector("#previousVariant");
 const nextVariant = document.querySelector("#nextVariant");
 const copyCurrentButton = document.querySelector("#copyCurrent");
+const productImagesInput = document.querySelector("#productImages");
+const uploadZone = document.querySelector("#uploadZone");
+const imagePreviewGrid = document.querySelector("#imagePreviewGrid");
+const analyzeImagesButton = document.querySelector("#analyzeImages");
+const clearImagesButton = document.querySelector("#clearImages");
+const analysisStatus = document.querySelector("#analysisStatus");
+const analysisWarning = document.querySelector("#analysisWarning");
+
+let selectedImages = [];
 
 const outputLabels = {
   caption: "Caption TikTok/Facebook",
@@ -154,6 +163,123 @@ const splitBenefits = (benefits) =>
     .map((item) => item.trim())
     .filter(Boolean)
     .slice(0, 5);
+
+const fileToDataUrl = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+const compressImage = async (file) => {
+  const source = await fileToDataUrl(file);
+  const image = new Image();
+
+  await new Promise((resolve, reject) => {
+    image.onload = resolve;
+    image.onerror = reject;
+    image.src = source;
+  });
+
+  const maxSide = 1280;
+  const scale = Math.min(1, maxSide / Math.max(image.width, image.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(image.width * scale));
+  canvas.height = Math.max(1, Math.round(image.height * scale));
+  const context = canvas.getContext("2d");
+  context.drawImage(image, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL("image/jpeg", 0.82);
+};
+
+const renderImagePreviews = () => {
+  imagePreviewGrid.replaceChildren();
+  imagePreviewGrid.hidden = selectedImages.length === 0;
+  imagePreviewGrid.style.display = selectedImages.length ? "grid" : "";
+  analyzeImagesButton.disabled = selectedImages.length === 0;
+  clearImagesButton.hidden = selectedImages.length === 0;
+
+  selectedImages.forEach((imageData, index) => {
+    const item = document.createElement("div");
+    item.className = "image-preview";
+    const image = document.createElement("img");
+    image.src = imageData;
+    image.alt = `Ảnh sản phẩm ${index + 1}`;
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.textContent = "×";
+    removeButton.setAttribute("aria-label", `Xóa ảnh ${index + 1}`);
+    removeButton.addEventListener("click", () => {
+      selectedImages.splice(index, 1);
+      renderImagePreviews();
+    });
+    item.append(image, removeButton);
+    imagePreviewGrid.appendChild(item);
+  });
+};
+
+const addImageFiles = async (files) => {
+  const candidates = Array.from(files)
+    .filter((file) => ["image/jpeg", "image/png", "image/webp"].includes(file.type))
+    .slice(0, Math.max(0, 3 - selectedImages.length));
+
+  if (!candidates.length) {
+    showToast("Chọn ảnh JPG, PNG hoặc WEBP");
+    return;
+  }
+
+  const oversized = candidates.find((file) => file.size > 8 * 1024 * 1024);
+  if (oversized) {
+    showToast("Mỗi ảnh phải dưới 8 MB");
+    return;
+  }
+
+  try {
+    const compressed = await Promise.all(candidates.map(compressImage));
+    selectedImages.push(...compressed);
+    renderImagePreviews();
+    showToast(`Đã thêm ${compressed.length} ảnh`);
+  } catch (error) {
+    showToast("Không đọc được ảnh này");
+  }
+};
+
+const analyzeImagesWithApi = async () => {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), 30000);
+
+  try {
+    const response = await fetch("/api/analyze-image", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ images: selectedImages }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) throw new Error(`Analyze failed: ${response.status}`);
+    return response.json();
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+};
+
+const applyImageAnalysis = (analysis) => {
+  const fieldMap = {
+    productName: analysis.productName,
+    customer: analysis.customer,
+    painPoint: analysis.painPoint,
+    benefits: analysis.benefits,
+  };
+
+  Object.entries(fieldMap).forEach(([name, value]) => {
+    if (value && form.elements[name]) form.elements[name].value = value;
+  });
+
+  updateBriefQuality();
+  analysisWarning.hidden = false;
+};
 
 const getFormData = () => {
   const data = new FormData(form);
@@ -411,6 +537,56 @@ form.addEventListener("input", updateBriefQuality);
 form.addEventListener("submit", (event) => {
   event.preventDefault();
   simulateGenerate();
+});
+
+productImagesInput.addEventListener("change", async () => {
+  await addImageFiles(productImagesInput.files);
+  productImagesInput.value = "";
+});
+
+["dragenter", "dragover"].forEach((eventName) => {
+  uploadZone.addEventListener(eventName, (event) => {
+    event.preventDefault();
+    uploadZone.classList.add("dragging");
+  });
+});
+
+["dragleave", "drop"].forEach((eventName) => {
+  uploadZone.addEventListener(eventName, (event) => {
+    event.preventDefault();
+    uploadZone.classList.remove("dragging");
+  });
+});
+
+uploadZone.addEventListener("drop", async (event) => {
+  await addImageFiles(event.dataTransfer.files);
+});
+
+clearImagesButton.addEventListener("click", () => {
+  selectedImages = [];
+  analysisWarning.hidden = true;
+  renderImagePreviews();
+  showToast("Đã xóa ảnh");
+});
+
+analyzeImagesButton.addEventListener("click", async () => {
+  if (!selectedImages.length) return;
+
+  analyzeImagesButton.disabled = true;
+  analysisStatus.hidden = false;
+  analysisStatus.style.display = "flex";
+
+  try {
+    const result = await analyzeImagesWithApi();
+    applyImageAnalysis(result.analysis || result);
+    showToast(result.mode === "openai" ? "Đã phân tích ảnh" : "Đã điền brief mẫu");
+  } catch (error) {
+    showToast(error.name === "AbortError" ? "Phân tích quá lâu, thử lại sau" : "Chưa phân tích được ảnh");
+  } finally {
+    analysisStatus.hidden = true;
+    analysisStatus.style.display = "";
+    analyzeImagesButton.disabled = selectedImages.length === 0;
+  }
 });
 
 fillDemoButton.addEventListener("click", () => fillSample(samples.shirt));

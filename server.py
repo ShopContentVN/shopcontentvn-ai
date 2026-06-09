@@ -10,6 +10,7 @@ import urllib.request
 
 APP_DIR = Path(__file__).resolve().parent
 MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+VISION_MODEL = os.environ.get("OPENAI_VISION_MODEL", "gpt-4.1-mini")
 FEEDBACK_PATH = APP_DIR / "feedback.csv"
 
 
@@ -19,6 +20,16 @@ Nhiệm vụ: tạo nội dung bán hàng rõ ràng, dễ copy, dùng tiếng Vi
 Không nói chung chung. Không bịa thông số sản phẩm. Không hứa hẹn quá đà.
 Output bắt buộc là JSON hợp lệ với 4 key: caption, description, hooks, live.
 Mỗi value là string tiếng Việt.
+""".strip()
+
+VISION_PROMPT = """
+Bạn đang phân tích ảnh sản phẩm để hỗ trợ seller Việt viết content.
+Chỉ mô tả chi tiết nhìn thấy rõ trong ảnh. Không đoán chất liệu, công dụng, kích thước,
+thành phần, thương hiệu, chứng nhận hoặc hiệu quả nếu ảnh không thể hiện chắc chắn.
+Trả về JSON hợp lệ, không markdown, với các key:
+productName, customer, painPoint, benefits, category, confidence, notes.
+Mỗi value là string tiếng Việt. benefits là chuỗi 3-5 ý ngăn cách bằng dấu phẩy.
+notes phải nhắc người dùng xác minh các thông tin không thể biết chỉ từ ảnh.
 """.strip()
 
 
@@ -58,6 +69,18 @@ def fallback_content(payload):
             f"3. Giới thiệu: Mẫu này hợp với {customer}, nổi bật ở {benefits}.\n\n"
             "4. CTA: Comment số 1 để shop gửi thông tin và mẫu phù hợp."
         ),
+    }
+
+
+def fallback_image_analysis():
+    return {
+        "productName": "sản phẩm trong ảnh",
+        "customer": "khách đang tìm sản phẩm phù hợp nhu cầu cá nhân",
+        "painPoint": "chưa biết sản phẩm có phù hợp với nhu cầu thực tế hay không",
+        "benefits": "hình ảnh trực quan, dễ giới thiệu, có thể tư vấn theo nhu cầu khách",
+        "category": "chưa xác định",
+        "confidence": "demo",
+        "notes": "Chưa có API Vision nên app chưa thực sự đọc ảnh. Hãy kiểm tra và sửa brief trước khi tạo nội dung.",
     }
 
 
@@ -133,6 +156,54 @@ def call_openai(payload):
     return parsed, "openai"
 
 
+def call_openai_vision(payload):
+    images = payload.get("images") or []
+    if not isinstance(images, list) or not 1 <= len(images) <= 3:
+        raise ValueError("Cần từ 1 đến 3 ảnh.")
+
+    total_size = sum(len(str(image)) for image in images)
+    if total_size > 16_000_000:
+        raise ValueError("Tổng dung lượng ảnh quá lớn.")
+
+    for image in images:
+        if not isinstance(image, str) or not image.startswith(
+            ("data:image/jpeg;base64,", "data:image/png;base64,", "data:image/webp;base64,")
+        ):
+            raise ValueError("Định dạng ảnh không hợp lệ.")
+
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        return fallback_image_analysis(), "demo"
+
+    content = [{"type": "input_text", "text": VISION_PROMPT}]
+    content.extend(
+        {"type": "input_image", "image_url": image, "detail": "low"}
+        for image in images
+    )
+
+    request_body = {
+        "model": VISION_MODEL,
+        "input": [{"role": "user", "content": content}],
+    }
+
+    request = urllib.request.Request(
+        "https://api.openai.com/v1/responses",
+        data=json.dumps(request_body).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+
+    with urllib.request.urlopen(request, timeout=25) as response:
+        data = json.loads(response.read().decode("utf-8"))
+
+    output_text = extract_output_text(data)
+    parsed = parse_model_json(output_text)
+    return parsed, "openai"
+
+
 def save_feedback(payload):
     row = {
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -156,7 +227,7 @@ class Handler(SimpleHTTPRequestHandler):
         super().__init__(*args, directory=str(APP_DIR), **kwargs)
 
     def do_POST(self):
-        if self.path not in ("/api/generate", "/api/feedback"):
+        if self.path not in ("/api/generate", "/api/feedback", "/api/analyze-image"):
             self.send_error(404)
             return
 
@@ -168,9 +239,20 @@ class Handler(SimpleHTTPRequestHandler):
                 self.respond_json(save_feedback(payload))
                 return
 
+            if self.path == "/api/analyze-image":
+                analysis, mode = call_openai_vision(payload)
+                self.respond_json({"mode": mode, "analysis": analysis})
+                return
+
             content, mode = call_openai(payload)
             self.respond_json({"mode": mode, "content": content})
         except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, json.JSONDecodeError) as error:
+            if self.path == "/api/analyze-image":
+                self.respond_json(
+                    {"mode": "demo", "analysis": fallback_image_analysis(), "error": str(error)},
+                    status=200,
+                )
+                return
             self.respond_json(
                 {"mode": "fallback", "content": fallback_content(payload if "payload" in locals() else {}), "error": str(error)},
                 status=200,

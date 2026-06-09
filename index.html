@@ -200,6 +200,42 @@
             <div class="quality-bar"><span id="briefQualityBar"></span></div>
           </div>
 
+          <section class="image-analyzer">
+            <div class="image-analyzer-head">
+              <div>
+                <span>Phân tích ảnh sản phẩm</span>
+                <small>Tải 1-3 ảnh thật, AI sẽ gợi ý brief để bạn kiểm tra lại.</small>
+              </div>
+              <span class="beta-badge">Vision beta</span>
+            </div>
+
+            <label class="upload-zone" id="uploadZone">
+              <input id="productImages" type="file" accept="image/png,image/jpeg,image/webp" multiple hidden />
+              <span class="upload-icon">+</span>
+              <strong>Chọn hoặc kéo ảnh sản phẩm vào đây</strong>
+              <small>PNG, JPG, WEBP · tối đa 3 ảnh · mỗi ảnh dưới 8 MB</small>
+            </label>
+
+            <div class="image-preview-grid" id="imagePreviewGrid" hidden></div>
+
+            <div class="image-actions">
+              <button type="button" id="analyzeImages" class="analyze-button" disabled>
+                <span>Phân tích và tự điền brief</span>
+                <b>AI Vision</b>
+              </button>
+              <button type="button" id="clearImages" class="text-button" hidden>Xóa ảnh</button>
+            </div>
+
+            <div class="analysis-status" id="analysisStatus" hidden>
+              <div class="loader"></div>
+              <span>Đang nhìn ảnh và tìm điểm bán hàng...</span>
+            </div>
+
+            <div class="analysis-warning" id="analysisWarning" hidden>
+              AI chỉ phân tích chi tiết nhìn thấy được. Hãy tự kiểm tra chất liệu, công dụng và thông số trước khi đăng.
+            </div>
+          </section>
+
           <div id="examples" class="preset-row" aria-label="Sản phẩm mẫu">
             <button type="button" data-sample="shirt">Áo thun nữ</button>
             <button type="button" data-sample="sunscreen">Kem chống nắng</button>

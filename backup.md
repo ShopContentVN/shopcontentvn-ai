@@ -1,6 +1,6 @@
 ﻿# ShopContentVN AI - Auto Backup
 
-Last updated: 2026-06-09 08:29:37
+Last updated: 2026-06-09 11:47:21
 
 ## Project
 
@@ -231,6 +231,42 @@ python server.py
             </div>
             <div class="quality-bar"><span id="briefQualityBar"></span></div>
           </div>
+
+          <section class="image-analyzer">
+            <div class="image-analyzer-head">
+              <div>
+                <span>Phân tích ảnh sản phẩm</span>
+                <small>Tải 1-3 ảnh thật, AI sẽ gợi ý brief để bạn kiểm tra lại.</small>
+              </div>
+              <span class="beta-badge">Vision beta</span>
+            </div>
+
+            <label class="upload-zone" id="uploadZone">
+              <input id="productImages" type="file" accept="image/png,image/jpeg,image/webp" multiple hidden />
+              <span class="upload-icon">+</span>
+              <strong>Chọn hoặc kéo ảnh sản phẩm vào đây</strong>
+              <small>PNG, JPG, WEBP · tối đa 3 ảnh · mỗi ảnh dưới 8 MB</small>
+            </label>
+
+            <div class="image-preview-grid" id="imagePreviewGrid" hidden></div>
+
+            <div class="image-actions">
+              <button type="button" id="analyzeImages" class="analyze-button" disabled>
+                <span>Phân tích và tự điền brief</span>
+                <b>AI Vision</b>
+              </button>
+              <button type="button" id="clearImages" class="text-button" hidden>Xóa ảnh</button>
+            </div>
+
+            <div class="analysis-status" id="analysisStatus" hidden>
+              <div class="loader"></div>
+              <span>Đang nhìn ảnh và tìm điểm bán hàng...</span>
+            </div>
+
+            <div class="analysis-warning" id="analysisWarning" hidden>
+              AI chỉ phân tích chi tiết nhìn thấy được. Hãy tự kiểm tra chất liệu, công dụng và thông số trước khi đăng.
+            </div>
+          </section>
 
           <div id="examples" class="preset-row" aria-label="Sản phẩm mẫu">
             <button type="button" data-sample="shirt">Áo thun nữ</button>
@@ -1112,6 +1148,173 @@ h2 {
   margin-bottom: 16px;
 }
 
+.image-analyzer {
+  margin-bottom: 18px;
+  border: 1px solid rgba(69, 216, 255, 0.28);
+  border-radius: 20px;
+  background:
+    linear-gradient(145deg, rgba(69, 216, 255, 0.1), transparent 48%),
+    rgba(255, 255, 255, 0.035);
+  padding: 15px;
+}
+
+.image-analyzer-head,
+.image-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.image-analyzer-head span,
+.image-analyzer-head small {
+  display: block;
+}
+
+.image-analyzer-head > div > span {
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.image-analyzer-head small {
+  margin-top: 4px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.beta-badge {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  color: #06100c;
+  background: var(--cyan);
+  padding: 6px 9px;
+  font-size: 11px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.upload-zone {
+  min-height: 142px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 7px;
+  margin-top: 14px;
+  border: 1px dashed rgba(255, 255, 255, 0.28);
+  border-radius: 17px;
+  background: rgba(4, 8, 12, 0.45);
+  padding: 18px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.upload-zone:hover,
+.upload-zone.dragging {
+  border-color: var(--cyan);
+  background: rgba(69, 216, 255, 0.08);
+}
+
+.upload-zone small {
+  color: var(--muted);
+}
+
+.upload-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #06100c;
+  background: var(--cyan);
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.image-preview-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 12px;
+}
+
+.image-preview {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #080d12;
+}
+
+.image-preview img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.image-preview button {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: white;
+  background: rgba(5, 8, 12, 0.84);
+  font-weight: 900;
+}
+
+.image-actions {
+  align-items: stretch;
+  margin-top: 12px;
+}
+
+.analyze-button {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  gap: 12px;
+  border: 0;
+  border-radius: 13px;
+  color: #06100c;
+  background: linear-gradient(135deg, var(--cyan), var(--green));
+  padding: 0 15px;
+  font-weight: 950;
+}
+
+.analyze-button b {
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.analyze-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.analysis-status {
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  color: var(--soft);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.analysis-warning {
+  margin-top: 12px;
+  border-left: 3px solid var(--yellow);
+  color: var(--muted);
+  background: rgba(255, 240, 106, 0.06);
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 .preset-row button {
   min-height: 38px;
   border-radius: 999px;
@@ -1660,6 +1863,12 @@ pre {
     grid-template-columns: 1fr;
   }
 
+  .image-analyzer-head,
+  .image-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .console-rail {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -1696,6 +1905,15 @@ const variantDots = document.querySelector("#variantDots");
 const previousVariant = document.querySelector("#previousVariant");
 const nextVariant = document.querySelector("#nextVariant");
 const copyCurrentButton = document.querySelector("#copyCurrent");
+const productImagesInput = document.querySelector("#productImages");
+const uploadZone = document.querySelector("#uploadZone");
+const imagePreviewGrid = document.querySelector("#imagePreviewGrid");
+const analyzeImagesButton = document.querySelector("#analyzeImages");
+const clearImagesButton = document.querySelector("#clearImages");
+const analysisStatus = document.querySelector("#analysisStatus");
+const analysisWarning = document.querySelector("#analysisWarning");
+
+let selectedImages = [];
 
 const outputLabels = {
   caption: "Caption TikTok/Facebook",
@@ -1825,6 +2043,123 @@ const splitBenefits = (benefits) =>
     .map((item) => item.trim())
     .filter(Boolean)
     .slice(0, 5);
+
+const fileToDataUrl = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+const compressImage = async (file) => {
+  const source = await fileToDataUrl(file);
+  const image = new Image();
+
+  await new Promise((resolve, reject) => {
+    image.onload = resolve;
+    image.onerror = reject;
+    image.src = source;
+  });
+
+  const maxSide = 1280;
+  const scale = Math.min(1, maxSide / Math.max(image.width, image.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(image.width * scale));
+  canvas.height = Math.max(1, Math.round(image.height * scale));
+  const context = canvas.getContext("2d");
+  context.drawImage(image, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL("image/jpeg", 0.82);
+};
+
+const renderImagePreviews = () => {
+  imagePreviewGrid.replaceChildren();
+  imagePreviewGrid.hidden = selectedImages.length === 0;
+  imagePreviewGrid.style.display = selectedImages.length ? "grid" : "";
+  analyzeImagesButton.disabled = selectedImages.length === 0;
+  clearImagesButton.hidden = selectedImages.length === 0;
+
+  selectedImages.forEach((imageData, index) => {
+    const item = document.createElement("div");
+    item.className = "image-preview";
+    const image = document.createElement("img");
+    image.src = imageData;
+    image.alt = `Ảnh sản phẩm ${index + 1}`;
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.textContent = "×";
+    removeButton.setAttribute("aria-label", `Xóa ảnh ${index + 1}`);
+    removeButton.addEventListener("click", () => {
+      selectedImages.splice(index, 1);
+      renderImagePreviews();
+    });
+    item.append(image, removeButton);
+    imagePreviewGrid.appendChild(item);
+  });
+};
+
+const addImageFiles = async (files) => {
+  const candidates = Array.from(files)
+    .filter((file) => ["image/jpeg", "image/png", "image/webp"].includes(file.type))
+    .slice(0, Math.max(0, 3 - selectedImages.length));
+
+  if (!candidates.length) {
+    showToast("Chọn ảnh JPG, PNG hoặc WEBP");
+    return;
+  }
+
+  const oversized = candidates.find((file) => file.size > 8 * 1024 * 1024);
+  if (oversized) {
+    showToast("Mỗi ảnh phải dưới 8 MB");
+    return;
+  }
+
+  try {
+    const compressed = await Promise.all(candidates.map(compressImage));
+    selectedImages.push(...compressed);
+    renderImagePreviews();
+    showToast(`Đã thêm ${compressed.length} ảnh`);
+  } catch (error) {
+    showToast("Không đọc được ảnh này");
+  }
+};
+
+const analyzeImagesWithApi = async () => {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), 30000);
+
+  try {
+    const response = await fetch("/api/analyze-image", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ images: selectedImages }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) throw new Error(`Analyze failed: ${response.status}`);
+    return response.json();
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+};
+
+const applyImageAnalysis = (analysis) => {
+  const fieldMap = {
+    productName: analysis.productName,
+    customer: analysis.customer,
+    painPoint: analysis.painPoint,
+    benefits: analysis.benefits,
+  };
+
+  Object.entries(fieldMap).forEach(([name, value]) => {
+    if (value && form.elements[name]) form.elements[name].value = value;
+  });
+
+  updateBriefQuality();
+  analysisWarning.hidden = false;
+};
 
 const getFormData = () => {
   const data = new FormData(form);
@@ -2084,6 +2419,56 @@ form.addEventListener("submit", (event) => {
   simulateGenerate();
 });
 
+productImagesInput.addEventListener("change", async () => {
+  await addImageFiles(productImagesInput.files);
+  productImagesInput.value = "";
+});
+
+["dragenter", "dragover"].forEach((eventName) => {
+  uploadZone.addEventListener(eventName, (event) => {
+    event.preventDefault();
+    uploadZone.classList.add("dragging");
+  });
+});
+
+["dragleave", "drop"].forEach((eventName) => {
+  uploadZone.addEventListener(eventName, (event) => {
+    event.preventDefault();
+    uploadZone.classList.remove("dragging");
+  });
+});
+
+uploadZone.addEventListener("drop", async (event) => {
+  await addImageFiles(event.dataTransfer.files);
+});
+
+clearImagesButton.addEventListener("click", () => {
+  selectedImages = [];
+  analysisWarning.hidden = true;
+  renderImagePreviews();
+  showToast("Đã xóa ảnh");
+});
+
+analyzeImagesButton.addEventListener("click", async () => {
+  if (!selectedImages.length) return;
+
+  analyzeImagesButton.disabled = true;
+  analysisStatus.hidden = false;
+  analysisStatus.style.display = "flex";
+
+  try {
+    const result = await analyzeImagesWithApi();
+    applyImageAnalysis(result.analysis || result);
+    showToast(result.mode === "openai" ? "Đã phân tích ảnh" : "Đã điền brief mẫu");
+  } catch (error) {
+    showToast(error.name === "AbortError" ? "Phân tích quá lâu, thử lại sau" : "Chưa phân tích được ảnh");
+  } finally {
+    analysisStatus.hidden = true;
+    analysisStatus.style.display = "";
+    analyzeImagesButton.disabled = selectedImages.length === 0;
+  }
+});
+
 fillDemoButton.addEventListener("click", () => fillSample(samples.shirt));
 
 clearFormButton.addEventListener("click", () => {
@@ -2192,6 +2577,7 @@ import urllib.request
 
 APP_DIR = Path(__file__).resolve().parent
 MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+VISION_MODEL = os.environ.get("OPENAI_VISION_MODEL", "gpt-4.1-mini")
 FEEDBACK_PATH = APP_DIR / "feedback.csv"
 
 
@@ -2201,6 +2587,16 @@ Nhiệm vụ: tạo nội dung bán hàng rõ ràng, dễ copy, dùng tiếng Vi
 Không nói chung chung. Không bịa thông số sản phẩm. Không hứa hẹn quá đà.
 Output bắt buộc là JSON hợp lệ với 4 key: caption, description, hooks, live.
 Mỗi value là string tiếng Việt.
+""".strip()
+
+VISION_PROMPT = """
+Bạn đang phân tích ảnh sản phẩm để hỗ trợ seller Việt viết content.
+Chỉ mô tả chi tiết nhìn thấy rõ trong ảnh. Không đoán chất liệu, công dụng, kích thước,
+thành phần, thương hiệu, chứng nhận hoặc hiệu quả nếu ảnh không thể hiện chắc chắn.
+Trả về JSON hợp lệ, không markdown, với các key:
+productName, customer, painPoint, benefits, category, confidence, notes.
+Mỗi value là string tiếng Việt. benefits là chuỗi 3-5 ý ngăn cách bằng dấu phẩy.
+notes phải nhắc người dùng xác minh các thông tin không thể biết chỉ từ ảnh.
 """.strip()
 
 
@@ -2240,6 +2636,18 @@ def fallback_content(payload):
             f"3. Giới thiệu: Mẫu này hợp với {customer}, nổi bật ở {benefits}.\n\n"
             "4. CTA: Comment số 1 để shop gửi thông tin và mẫu phù hợp."
         ),
+    }
+
+
+def fallback_image_analysis():
+    return {
+        "productName": "sản phẩm trong ảnh",
+        "customer": "khách đang tìm sản phẩm phù hợp nhu cầu cá nhân",
+        "painPoint": "chưa biết sản phẩm có phù hợp với nhu cầu thực tế hay không",
+        "benefits": "hình ảnh trực quan, dễ giới thiệu, có thể tư vấn theo nhu cầu khách",
+        "category": "chưa xác định",
+        "confidence": "demo",
+        "notes": "Chưa có API Vision nên app chưa thực sự đọc ảnh. Hãy kiểm tra và sửa brief trước khi tạo nội dung.",
     }
 
 
@@ -2315,6 +2723,54 @@ def call_openai(payload):
     return parsed, "openai"
 
 
+def call_openai_vision(payload):
+    images = payload.get("images") or []
+    if not isinstance(images, list) or not 1 <= len(images) <= 3:
+        raise ValueError("Cần từ 1 đến 3 ảnh.")
+
+    total_size = sum(len(str(image)) for image in images)
+    if total_size > 16_000_000:
+        raise ValueError("Tổng dung lượng ảnh quá lớn.")
+
+    for image in images:
+        if not isinstance(image, str) or not image.startswith(
+            ("data:image/jpeg;base64,", "data:image/png;base64,", "data:image/webp;base64,")
+        ):
+            raise ValueError("Định dạng ảnh không hợp lệ.")
+
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        return fallback_image_analysis(), "demo"
+
+    content = [{"type": "input_text", "text": VISION_PROMPT}]
+    content.extend(
+        {"type": "input_image", "image_url": image, "detail": "low"}
+        for image in images
+    )
+
+    request_body = {
+        "model": VISION_MODEL,
+        "input": [{"role": "user", "content": content}],
+    }
+
+    request = urllib.request.Request(
+        "https://api.openai.com/v1/responses",
+        data=json.dumps(request_body).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+
+    with urllib.request.urlopen(request, timeout=25) as response:
+        data = json.loads(response.read().decode("utf-8"))
+
+    output_text = extract_output_text(data)
+    parsed = parse_model_json(output_text)
+    return parsed, "openai"
+
+
 def save_feedback(payload):
     row = {
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -2338,7 +2794,7 @@ class Handler(SimpleHTTPRequestHandler):
         super().__init__(*args, directory=str(APP_DIR), **kwargs)
 
     def do_POST(self):
-        if self.path not in ("/api/generate", "/api/feedback"):
+        if self.path not in ("/api/generate", "/api/feedback", "/api/analyze-image"):
             self.send_error(404)
             return
 
@@ -2350,9 +2806,20 @@ class Handler(SimpleHTTPRequestHandler):
                 self.respond_json(save_feedback(payload))
                 return
 
+            if self.path == "/api/analyze-image":
+                analysis, mode = call_openai_vision(payload)
+                self.respond_json({"mode": mode, "analysis": analysis})
+                return
+
             content, mode = call_openai(payload)
             self.respond_json({"mode": mode, "content": content})
         except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, json.JSONDecodeError) as error:
+            if self.path == "/api/analyze-image":
+                self.respond_json(
+                    {"mode": "demo", "analysis": fallback_image_analysis(), "error": str(error)},
+                    status=200,
+                )
+                return
             self.respond_json(
                 {"mode": "fallback", "content": fallback_content(payload if "payload" in locals() else {}), "error": str(error)},
                 status=200,
@@ -2392,6 +2859,7 @@ App demo cho seller Viet:
 - Nhap ten san pham.
 - Chon kenh ban va tone.
 - Tao caption, mo ta Shopee, hook video va kich ban livestream.
+- Upload 1-3 anh san pham de AI goi y brief.
 - Copy tung phan hoac copy tat ca.
 
 Chay local:
@@ -2406,14 +2874,22 @@ Mo:
 http://127.0.0.1:5506/
 ```
 
-Neu co `OPENAI_API_KEY`, backend se goi OpenAI qua `/api/generate`. Neu chua co key, app tu chay fallback demo de khong bi chet flow.
+Neu co `OPENAI_API_KEY`, backend se goi OpenAI qua:
+
+- `/api/generate`: tao content.
+- `/api/analyze-image`: phan tich anh va tu dien brief.
+
+Neu chua co key, app tu chay fallback demo de khong bi chet flow. Che do demo khong thuc su doc noi dung anh.
 
 Set key tren PowerShell:
 
 ```powershell
 $env:OPENAI_API_KEY="sk-..."
+$env:OPENAI_VISION_MODEL="gpt-4.1-mini"
 python server.py
 ```
+
+Tren Render, them `OPENAI_API_KEY` trong Environment. Khong ghi API key vao `app.js`, `server.py` hoac GitHub.
 ```
 
 ### render.yaml
