@@ -125,7 +125,7 @@ def call_openai(payload):
         method="POST",
     )
 
-    with urllib.request.urlopen(request, timeout=45) as response:
+    with urllib.request.urlopen(request, timeout=10) as response:
         data = json.loads(response.read().decode("utf-8"))
 
     output_text = extract_output_text(data)

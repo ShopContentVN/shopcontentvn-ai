@@ -720,6 +720,11 @@ select:focus {
   text-transform: uppercase;
 }
 
+.generate-button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
 .loading {
   display: flex;
   align-items: center;

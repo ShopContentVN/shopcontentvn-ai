@@ -1,6 +1,6 @@
 ﻿# ShopContentVN AI - Auto Backup
 
-Last updated: 2026-06-09 08:19:57
+Last updated: 2026-06-09 08:29:37
 
 ## Project
 
@@ -1175,6 +1175,11 @@ select:focus {
   text-transform: uppercase;
 }
 
+.generate-button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
 .loading {
   display: flex;
   align-items: center;
@@ -1672,6 +1677,7 @@ const copyAllButton = document.querySelector("#copyAll");
 const copyAllTopButton = document.querySelector("#copyAllTop");
 const loadingState = document.querySelector("#loadingState");
 const outputGrid = document.querySelector("#outputGrid");
+const generateButton = document.querySelector("#generateButton");
 const toast = document.querySelector("#toast");
 const briefQuality = document.querySelector("#briefQuality");
 const briefQualityBar = document.querySelector("#briefQualityBar");
@@ -1861,13 +1867,22 @@ const buildContent = (input) => {
 };
 
 const generateWithApi = async (input) => {
-  const response = await fetch("/api/generate", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(input),
-  });
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), 12000);
+  let response;
+
+  try {
+    response = await fetch("/api/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(input),
+      signal: controller.signal,
+    });
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
 
   if (!response.ok) {
     throw new Error(`Generate failed: ${response.status}`);
@@ -1975,6 +1990,8 @@ const simulateGenerate = async () => {
   const input = getFormData();
   loadingState.hidden = false;
   outputGrid.style.opacity = "0.45";
+  generateButton.disabled = true;
+  generateButton.querySelector("span").textContent = "Đang tạo nội dung...";
 
   try {
     const content = await generateWithApi(input);
@@ -1982,10 +1999,12 @@ const simulateGenerate = async () => {
     showToast("Đã tạo bằng AI");
   } catch (error) {
     renderContent(buildContent(input));
-    showToast("Đang chạy bản demo");
+    showToast(error.name === "AbortError" ? "AI phản hồi chậm, đã dùng bản nhanh" : "Đã dùng bản dự phòng");
   } finally {
     loadingState.hidden = true;
     outputGrid.style.opacity = "1";
+    generateButton.disabled = false;
+    generateButton.querySelector("span").textContent = "Tạo bộ nội dung";
   }
 };
 
@@ -2288,7 +2307,7 @@ def call_openai(payload):
         method="POST",
     )
 
-    with urllib.request.urlopen(request, timeout=45) as response:
+    with urllib.request.urlopen(request, timeout=10) as response:
         data = json.loads(response.read().decode("utf-8"))
 
     output_text = extract_output_text(data)
