@@ -12,6 +12,16 @@ APP_DIR = Path(__file__).resolve().parent
 MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
 VISION_MODEL = os.environ.get("OPENAI_VISION_MODEL", "gpt-4.1-mini")
 FEEDBACK_PATH = APP_DIR / "feedback.csv"
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
+SUPABASE_ANON_KEY = os.environ.get("SUPABASE_ANON_KEY", "")
+SUPABASE_SERVICE_ROLE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+DAILY_AI_LIMIT = 5
+
+
+class ApiError(Exception):
+    def __init__(self, message, status=400):
+        super().__init__(message)
+        self.status = status
 
 
 SYSTEM_PROMPT = """
@@ -111,6 +121,78 @@ def parse_model_json(output_text):
         clean = clean[start : end + 1]
 
     return json.loads(clean)
+
+
+def supabase_is_configured():
+    return bool(SUPABASE_URL and SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY)
+
+
+def request_json(url, method="GET", headers=None, payload=None, timeout=12):
+    data = None if payload is None else json.dumps(payload).encode("utf-8")
+    request = urllib.request.Request(
+        url,
+        data=data,
+        headers=headers or {},
+        method=method,
+    )
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        raw = response.read().decode("utf-8")
+        return json.loads(raw) if raw else None
+
+
+def verify_supabase_user(authorization_header):
+    if not supabase_is_configured():
+        raise ApiError("Google login chưa được cấu hình.", 503)
+
+    if not authorization_header or not authorization_header.startswith("Bearer "):
+        raise ApiError("Bạn cần đăng nhập Google để dùng AI.", 401)
+
+    access_token = authorization_header.removeprefix("Bearer ").strip()
+    try:
+        user = request_json(
+            f"{SUPABASE_URL}/auth/v1/user",
+            headers={
+                "apikey": SUPABASE_ANON_KEY,
+                "Authorization": f"Bearer {access_token}",
+            },
+        )
+    except urllib.error.HTTPError as error:
+        raise ApiError("Phiên đăng nhập không hợp lệ hoặc đã hết hạn.", 401) from error
+
+    if not user or not user.get("id"):
+        raise ApiError("Không xác minh được tài khoản.", 401)
+    return user
+
+
+def call_quota_rpc(function_name, user_id, daily_limit=DAILY_AI_LIMIT):
+    try:
+        result = request_json(
+            f"{SUPABASE_URL}/rest/v1/rpc/{function_name}",
+            method="POST",
+            headers={
+                "apikey": SUPABASE_SERVICE_ROLE_KEY,
+                "Authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}",
+                "Content-Type": "application/json",
+            },
+            payload={"p_user_id": user_id, "p_daily_limit": daily_limit},
+        )
+    except urllib.error.HTTPError as error:
+        raise ApiError("Không kiểm tra được giới hạn sử dụng.", 503) from error
+
+    if isinstance(result, (int, float)):
+        return int(result)
+    raise ApiError("Dữ liệu giới hạn sử dụng không hợp lệ.", 503)
+
+
+def consume_daily_quota(user_id):
+    remaining = call_quota_rpc("consume_daily_ai_quota", user_id)
+    if remaining < 0:
+        raise ApiError("Bạn đã dùng hết 5 lượt AI hôm nay.", 429)
+    return remaining
+
+
+def get_daily_quota(user_id):
+    return max(0, call_quota_rpc("get_daily_ai_remaining", user_id))
 
 
 def call_openai(payload):
@@ -226,6 +308,33 @@ class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(APP_DIR), **kwargs)
 
+    def do_GET(self):
+        if self.path == "/api/config":
+            self.respond_json(
+                {
+                    "supabaseUrl": SUPABASE_URL,
+                    "supabaseAnonKey": SUPABASE_ANON_KEY,
+                    "authConfigured": supabase_is_configured(),
+                    "dailyAiLimit": DAILY_AI_LIMIT,
+                }
+            )
+            return
+
+        if self.path == "/api/quota":
+            try:
+                user = verify_supabase_user(self.headers.get("Authorization"))
+                self.respond_json(
+                    {
+                        "remaining": get_daily_quota(user["id"]),
+                        "limit": DAILY_AI_LIMIT,
+                    }
+                )
+            except ApiError as error:
+                self.respond_json({"error": str(error)}, status=error.status)
+            return
+
+        super().do_GET()
+
     def do_POST(self):
         if self.path not in ("/api/generate", "/api/feedback", "/api/analyze-image"):
             self.send_error(404)
@@ -233,28 +342,57 @@ class Handler(SimpleHTTPRequestHandler):
 
         try:
             length = int(self.headers.get("Content-Length", "0"))
+            if length > 20_000_000:
+                raise ApiError("Dữ liệu gửi lên quá lớn.", 413)
             payload = json.loads(self.rfile.read(length).decode("utf-8"))
 
             if self.path == "/api/feedback":
                 self.respond_json(save_feedback(payload))
                 return
 
+            user = verify_supabase_user(self.headers.get("Authorization"))
+            remaining = consume_daily_quota(user["id"])
+
             if self.path == "/api/analyze-image":
                 analysis, mode = call_openai_vision(payload)
-                self.respond_json({"mode": mode, "analysis": analysis})
+                self.respond_json(
+                    {
+                        "mode": mode,
+                        "analysis": analysis,
+                        "remaining": remaining,
+                    }
+                )
                 return
 
             content, mode = call_openai(payload)
-            self.respond_json({"mode": mode, "content": content})
+            self.respond_json(
+                {
+                    "mode": mode,
+                    "content": content,
+                    "remaining": remaining,
+                }
+            )
+        except ApiError as error:
+            self.respond_json({"error": str(error)}, status=error.status)
         except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, json.JSONDecodeError) as error:
             if self.path == "/api/analyze-image":
                 self.respond_json(
-                    {"mode": "demo", "analysis": fallback_image_analysis(), "error": str(error)},
+                    {
+                        "mode": "demo",
+                        "analysis": fallback_image_analysis(),
+                        "remaining": remaining if "remaining" in locals() else None,
+                        "error": str(error),
+                    },
                     status=200,
                 )
                 return
             self.respond_json(
-                {"mode": "fallback", "content": fallback_content(payload if "payload" in locals() else {}), "error": str(error)},
+                {
+                    "mode": "fallback",
+                    "content": fallback_content(payload if "payload" in locals() else {}),
+                    "remaining": remaining if "remaining" in locals() else None,
+                    "error": str(error),
+                },
                 status=200,
             )
         except Exception as error:

@@ -24,6 +24,21 @@
         <a href="#contact">Liên hệ</a>
         <button type="button" id="copyAllTop" class="ghost-button">Copy output</button>
       </nav>
+      <div class="auth-area">
+        <div class="quota-badge" id="quotaBadge" hidden>
+          <span>Lượt AI hôm nay</span>
+          <strong id="quotaRemaining">5/5</strong>
+        </div>
+        <button type="button" id="loginButton" class="google-login-button">
+          <span class="google-mark">G</span>
+          <span>Đăng nhập Google</span>
+        </button>
+        <div class="user-chip" id="userChip" hidden>
+          <img id="userAvatar" alt="" />
+          <span id="userEmail"></span>
+          <button type="button" id="logoutButton" aria-label="Đăng xuất" title="Đăng xuất">↗</button>
+        </div>
+      </div>
     </header>
 
     <main id="top">
@@ -449,6 +464,7 @@
     </footer>
 
     <div id="toast" role="status" aria-live="polite"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./app.js"></script>
   </body>
 </html>

@@ -1,6 +1,6 @@
 ﻿# ShopContentVN AI - Auto Backup
 
-Last updated: 2026-06-09 11:47:21
+Last updated: 2026-06-09 12:02:08
 
 ## Project
 
@@ -56,6 +56,21 @@ python server.py
         <a href="#contact">Liên hệ</a>
         <button type="button" id="copyAllTop" class="ghost-button">Copy output</button>
       </nav>
+      <div class="auth-area">
+        <div class="quota-badge" id="quotaBadge" hidden>
+          <span>Lượt AI hôm nay</span>
+          <strong id="quotaRemaining">5/5</strong>
+        </div>
+        <button type="button" id="loginButton" class="google-login-button">
+          <span class="google-mark">G</span>
+          <span>Đăng nhập Google</span>
+        </button>
+        <div class="user-chip" id="userChip" hidden>
+          <img id="userAvatar" alt="" />
+          <span id="userEmail"></span>
+          <button type="button" id="logoutButton" aria-label="Đăng xuất" title="Đăng xuất">↗</button>
+        </div>
+      </div>
     </header>
 
     <main id="top">
@@ -481,6 +496,7 @@ python server.py
     </footer>
 
     <div id="toast" role="status" aria-live="polite"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="./app.js"></script>
   </body>
 </html>
@@ -623,6 +639,95 @@ main {
 
 .site-nav {
   gap: 8px;
+}
+
+.auth-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.google-login-button,
+.user-chip,
+.quota-badge {
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.google-login-button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--text);
+  padding: 0 13px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.google-mark {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #4285f4;
+  background: white;
+  font-weight: 950;
+}
+
+.quota-badge {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 12px;
+}
+
+.quota-badge span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.quota-badge strong {
+  color: var(--yellow);
+  font-size: 13px;
+}
+
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 250px;
+  padding: 5px 7px 5px 5px;
+}
+
+.user-chip img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  object-fit: cover;
+}
+
+.user-chip > span {
+  overflow: hidden;
+  color: var(--soft);
+  font-size: 12px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-chip button {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 9px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.07);
 }
 
 .site-nav a,
@@ -1760,6 +1865,15 @@ pre {
 }
 
 @media (max-width: 1160px) {
+  .site-header {
+    flex-wrap: wrap;
+  }
+
+  .site-nav {
+    order: 3;
+    width: 100%;
+  }
+
   .hero-stage,
   .studio-shell {
     grid-template-columns: 1fr;
@@ -1808,6 +1922,11 @@ pre {
     width: 100%;
     overflow-x: auto;
     padding-bottom: 2px;
+  }
+
+  .auth-area {
+    width: 100%;
+    flex-wrap: wrap;
   }
 
   .hero {
@@ -1912,8 +2031,18 @@ const analyzeImagesButton = document.querySelector("#analyzeImages");
 const clearImagesButton = document.querySelector("#clearImages");
 const analysisStatus = document.querySelector("#analysisStatus");
 const analysisWarning = document.querySelector("#analysisWarning");
+const loginButton = document.querySelector("#loginButton");
+const logoutButton = document.querySelector("#logoutButton");
+const userChip = document.querySelector("#userChip");
+const userAvatar = document.querySelector("#userAvatar");
+const userEmail = document.querySelector("#userEmail");
+const quotaBadge = document.querySelector("#quotaBadge");
+const quotaRemaining = document.querySelector("#quotaRemaining");
 
 let selectedImages = [];
+let authClient = null;
+let authSession = null;
+let authConfigured = false;
 
 const outputLabels = {
   caption: "Caption TikTok/Facebook",
@@ -2032,6 +2161,134 @@ const defaults = {
 
 const normalize = (value, fallback) => String(value || "").trim() || fallback;
 
+const updateQuotaDisplay = (remaining = 5) => {
+  const safeRemaining = Math.max(0, Number(remaining) || 0);
+  quotaRemaining.textContent = `${safeRemaining}/5`;
+  quotaBadge.hidden = !authSession;
+};
+
+const updateAuthDisplay = (session) => {
+  authSession = session;
+  const user = session?.user;
+  loginButton.hidden = Boolean(user);
+  userChip.hidden = !user;
+  quotaBadge.hidden = !user;
+
+  if (user) {
+    userEmail.textContent = user.email || "Tài khoản Google";
+    userAvatar.src = user.user_metadata?.avatar_url || "";
+    userAvatar.hidden = !userAvatar.src;
+  } else {
+    userEmail.textContent = "";
+    userAvatar.src = "";
+    updateQuotaDisplay(5);
+  }
+};
+
+const startGoogleLogin = async () => {
+  if (!authConfigured || !authClient) {
+    showToast("Chưa cấu hình đăng nhập Google");
+    return;
+  }
+
+  const { error } = await authClient.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${window.location.origin}${window.location.pathname}`,
+    },
+  });
+
+  if (error) showToast("Không mở được đăng nhập Google");
+};
+
+const requireAuthSession = async () => {
+  if (!authConfigured || !authClient) {
+    showToast("Chủ app chưa cấu hình Google login");
+    return null;
+  }
+
+  const { data } = await authClient.auth.getSession();
+  const session = data.session;
+  updateAuthDisplay(session);
+
+  if (!session) {
+    showToast("Đăng nhập Google để dùng AI");
+    await startGoogleLogin();
+    return null;
+  }
+
+  return session;
+};
+
+const authorizedFetch = async (url, options = {}) => {
+  const session = await requireAuthSession();
+  if (!session) {
+    const error = new Error("Authentication required");
+    error.name = "AuthRequiredError";
+    throw error;
+  }
+
+  const headers = new Headers(options.headers || {});
+  headers.set("Authorization", `Bearer ${session.access_token}`);
+  const response = await fetch(url, { ...options, headers });
+
+  if (response.status === 401) {
+    updateAuthDisplay(null);
+    const error = new Error("Session expired");
+    error.name = "AuthRequiredError";
+    throw error;
+  }
+
+  if (response.status === 429) {
+    updateQuotaDisplay(0);
+    const error = new Error("Daily quota reached");
+    error.name = "QuotaExceededError";
+    throw error;
+  }
+
+  return response;
+};
+
+const refreshQuota = async () => {
+  if (!authSession) return;
+
+  try {
+    const response = await authorizedFetch("/api/quota");
+    if (!response.ok) return;
+    const data = await response.json();
+    updateQuotaDisplay(data.remaining);
+  } catch (error) {
+    if (error.name !== "AuthRequiredError") {
+      console.warn("Could not refresh quota", error);
+    }
+  }
+};
+
+const initializeAuth = async () => {
+  try {
+    const response = await fetch("/api/config");
+    const config = await response.json();
+    authConfigured = Boolean(config.supabaseUrl && config.supabaseAnonKey && window.supabase);
+
+    if (!authConfigured) {
+      loginButton.querySelector("span:last-child").textContent = "Chưa cấu hình Google";
+      return;
+    }
+
+    authClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+    const { data } = await authClient.auth.getSession();
+    updateAuthDisplay(data.session);
+    if (data.session) await refreshQuota();
+
+    authClient.auth.onAuthStateChange((_event, session) => {
+      updateAuthDisplay(session);
+      if (session) window.setTimeout(refreshQuota, 0);
+    });
+  } catch (error) {
+    loginButton.querySelector("span:last-child").textContent = "Đăng nhập chưa sẵn sàng";
+  }
+};
+
 const sentenceCase = (value) => {
   const clean = normalize(value, "");
   return clean.charAt(0).toUpperCase() + clean.slice(1);
@@ -2129,7 +2386,7 @@ const analyzeImagesWithApi = async () => {
   const timeoutId = window.setTimeout(() => controller.abort(), 30000);
 
   try {
-    const response = await fetch("/api/analyze-image", {
+    const response = await authorizedFetch("/api/analyze-image", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -2139,7 +2396,9 @@ const analyzeImagesWithApi = async () => {
     });
 
     if (!response.ok) throw new Error(`Analyze failed: ${response.status}`);
-    return response.json();
+    const data = await response.json();
+    if (typeof data.remaining === "number") updateQuotaDisplay(data.remaining);
+    return data;
   } finally {
     window.clearTimeout(timeoutId);
   }
@@ -2207,7 +2466,7 @@ const generateWithApi = async (input) => {
   let response;
 
   try {
-    response = await fetch("/api/generate", {
+    response = await authorizedFetch("/api/generate", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -2224,6 +2483,7 @@ const generateWithApi = async (input) => {
   }
 
   const data = await response.json();
+  if (typeof data.remaining === "number") updateQuotaDisplay(data.remaining);
   return data.content || data;
 };
 
@@ -2333,6 +2593,11 @@ const simulateGenerate = async () => {
     renderContent(content);
     showToast("Đã tạo bằng AI");
   } catch (error) {
+    if (error.name === "AuthRequiredError") return;
+    if (error.name === "QuotaExceededError") {
+      showToast("Bạn đã dùng hết 5 lượt AI hôm nay");
+      return;
+    }
     renderContent(buildContent(input));
     showToast(error.name === "AbortError" ? "AI phản hồi chậm, đã dùng bản nhanh" : "Đã dùng bản dự phòng");
   } finally {
@@ -2461,6 +2726,11 @@ analyzeImagesButton.addEventListener("click", async () => {
     applyImageAnalysis(result.analysis || result);
     showToast(result.mode === "openai" ? "Đã phân tích ảnh" : "Đã điền brief mẫu");
   } catch (error) {
+    if (error.name === "AuthRequiredError") return;
+    if (error.name === "QuotaExceededError") {
+      showToast("Bạn đã dùng hết 5 lượt AI hôm nay");
+      return;
+    }
     showToast(error.name === "AbortError" ? "Phân tích quá lâu, thử lại sau" : "Chưa phân tích được ảnh");
   } finally {
     analysisStatus.hidden = true;
@@ -2533,6 +2803,15 @@ document.querySelectorAll(".copy-button").forEach((button) => {
 copyAllButton.addEventListener("click", () => copyText(getAllOutput()));
 copyAllTopButton.addEventListener("click", () => copyText(getAllOutput()));
 
+loginButton.addEventListener("click", startGoogleLogin);
+
+logoutButton.addEventListener("click", async () => {
+  if (!authClient) return;
+  await authClient.auth.signOut({ scope: "local" });
+  updateAuthDisplay(null);
+  showToast("Đã đăng xuất");
+});
+
 if (feedbackForm) {
   feedbackForm.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -2560,6 +2839,7 @@ if (feedbackForm) {
 
 updateBriefQuality();
 renderVariantPlayer();
+initializeAuth();
 ```
 
 ### server.py
@@ -2579,6 +2859,16 @@ APP_DIR = Path(__file__).resolve().parent
 MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
 VISION_MODEL = os.environ.get("OPENAI_VISION_MODEL", "gpt-4.1-mini")
 FEEDBACK_PATH = APP_DIR / "feedback.csv"
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
+SUPABASE_ANON_KEY = os.environ.get("SUPABASE_ANON_KEY", "")
+SUPABASE_SERVICE_ROLE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+DAILY_AI_LIMIT = 5
+
+
+class ApiError(Exception):
+    def __init__(self, message, status=400):
+        super().__init__(message)
+        self.status = status
 
 
 SYSTEM_PROMPT = """
@@ -2678,6 +2968,78 @@ def parse_model_json(output_text):
         clean = clean[start : end + 1]
 
     return json.loads(clean)
+
+
+def supabase_is_configured():
+    return bool(SUPABASE_URL and SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY)
+
+
+def request_json(url, method="GET", headers=None, payload=None, timeout=12):
+    data = None if payload is None else json.dumps(payload).encode("utf-8")
+    request = urllib.request.Request(
+        url,
+        data=data,
+        headers=headers or {},
+        method=method,
+    )
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        raw = response.read().decode("utf-8")
+        return json.loads(raw) if raw else None
+
+
+def verify_supabase_user(authorization_header):
+    if not supabase_is_configured():
+        raise ApiError("Google login chưa được cấu hình.", 503)
+
+    if not authorization_header or not authorization_header.startswith("Bearer "):
+        raise ApiError("Bạn cần đăng nhập Google để dùng AI.", 401)
+
+    access_token = authorization_header.removeprefix("Bearer ").strip()
+    try:
+        user = request_json(
+            f"{SUPABASE_URL}/auth/v1/user",
+            headers={
+                "apikey": SUPABASE_ANON_KEY,
+                "Authorization": f"Bearer {access_token}",
+            },
+        )
+    except urllib.error.HTTPError as error:
+        raise ApiError("Phiên đăng nhập không hợp lệ hoặc đã hết hạn.", 401) from error
+
+    if not user or not user.get("id"):
+        raise ApiError("Không xác minh được tài khoản.", 401)
+    return user
+
+
+def call_quota_rpc(function_name, user_id, daily_limit=DAILY_AI_LIMIT):
+    try:
+        result = request_json(
+            f"{SUPABASE_URL}/rest/v1/rpc/{function_name}",
+            method="POST",
+            headers={
+                "apikey": SUPABASE_SERVICE_ROLE_KEY,
+                "Authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}",
+                "Content-Type": "application/json",
+            },
+            payload={"p_user_id": user_id, "p_daily_limit": daily_limit},
+        )
+    except urllib.error.HTTPError as error:
+        raise ApiError("Không kiểm tra được giới hạn sử dụng.", 503) from error
+
+    if isinstance(result, (int, float)):
+        return int(result)
+    raise ApiError("Dữ liệu giới hạn sử dụng không hợp lệ.", 503)
+
+
+def consume_daily_quota(user_id):
+    remaining = call_quota_rpc("consume_daily_ai_quota", user_id)
+    if remaining < 0:
+        raise ApiError("Bạn đã dùng hết 5 lượt AI hôm nay.", 429)
+    return remaining
+
+
+def get_daily_quota(user_id):
+    return max(0, call_quota_rpc("get_daily_ai_remaining", user_id))
 
 
 def call_openai(payload):
@@ -2793,6 +3155,33 @@ class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(APP_DIR), **kwargs)
 
+    def do_GET(self):
+        if self.path == "/api/config":
+            self.respond_json(
+                {
+                    "supabaseUrl": SUPABASE_URL,
+                    "supabaseAnonKey": SUPABASE_ANON_KEY,
+                    "authConfigured": supabase_is_configured(),
+                    "dailyAiLimit": DAILY_AI_LIMIT,
+                }
+            )
+            return
+
+        if self.path == "/api/quota":
+            try:
+                user = verify_supabase_user(self.headers.get("Authorization"))
+                self.respond_json(
+                    {
+                        "remaining": get_daily_quota(user["id"]),
+                        "limit": DAILY_AI_LIMIT,
+                    }
+                )
+            except ApiError as error:
+                self.respond_json({"error": str(error)}, status=error.status)
+            return
+
+        super().do_GET()
+
     def do_POST(self):
         if self.path not in ("/api/generate", "/api/feedback", "/api/analyze-image"):
             self.send_error(404)
@@ -2800,28 +3189,57 @@ class Handler(SimpleHTTPRequestHandler):
 
         try:
             length = int(self.headers.get("Content-Length", "0"))
+            if length > 20_000_000:
+                raise ApiError("Dữ liệu gửi lên quá lớn.", 413)
             payload = json.loads(self.rfile.read(length).decode("utf-8"))
 
             if self.path == "/api/feedback":
                 self.respond_json(save_feedback(payload))
                 return
 
+            user = verify_supabase_user(self.headers.get("Authorization"))
+            remaining = consume_daily_quota(user["id"])
+
             if self.path == "/api/analyze-image":
                 analysis, mode = call_openai_vision(payload)
-                self.respond_json({"mode": mode, "analysis": analysis})
+                self.respond_json(
+                    {
+                        "mode": mode,
+                        "analysis": analysis,
+                        "remaining": remaining,
+                    }
+                )
                 return
 
             content, mode = call_openai(payload)
-            self.respond_json({"mode": mode, "content": content})
+            self.respond_json(
+                {
+                    "mode": mode,
+                    "content": content,
+                    "remaining": remaining,
+                }
+            )
+        except ApiError as error:
+            self.respond_json({"error": str(error)}, status=error.status)
         except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, json.JSONDecodeError) as error:
             if self.path == "/api/analyze-image":
                 self.respond_json(
-                    {"mode": "demo", "analysis": fallback_image_analysis(), "error": str(error)},
+                    {
+                        "mode": "demo",
+                        "analysis": fallback_image_analysis(),
+                        "remaining": remaining if "remaining" in locals() else None,
+                        "error": str(error),
+                    },
                     status=200,
                 )
                 return
             self.respond_json(
-                {"mode": "fallback", "content": fallback_content(payload if "payload" in locals() else {}), "error": str(error)},
+                {
+                    "mode": "fallback",
+                    "content": fallback_content(payload if "payload" in locals() else {}),
+                    "remaining": remaining if "remaining" in locals() else None,
+                    "error": str(error),
+                },
                 status=200,
             )
         except Exception as error:
@@ -2860,6 +3278,8 @@ App demo cho seller Viet:
 - Chon kenh ban va tone.
 - Tao caption, mo ta Shopee, hook video va kich ban livestream.
 - Upload 1-3 anh san pham de AI goi y brief.
+- Dang nhap Google de dung AI.
+- Gioi han 5 luot AI moi ngay cho moi tai khoan.
 - Copy tung phan hoac copy tat ca.
 
 Chay local:
@@ -2890,6 +3310,153 @@ python server.py
 ```
 
 Tren Render, them `OPENAI_API_KEY` trong Environment. Khong ghi API key vao `app.js`, `server.py` hoac GitHub.
+
+Google login va quota can Supabase. Xem `SUPABASE_SETUP.md` va chay `supabase.sql`.
+```
+
+### SUPABASE_SETUP.md
+
+```markdown
+# Google Login + 5 AI Requests Per Day
+
+## 1. Create Supabase project
+
+Create a free project at:
+
+```text
+https://supabase.com/dashboard
+```
+
+## 2. Run database SQL
+
+Open `SQL Editor`, paste all content from `supabase.sql`, then run it.
+
+## 3. Enable Google login
+
+In Supabase:
+
+```text
+Authentication -> Providers -> Google
+```
+
+Enable Google and enter the Google OAuth Client ID and Client Secret.
+
+In Google Cloud, add the callback URL shown by Supabase. It normally looks like:
+
+```text
+https://YOUR_PROJECT.supabase.co/auth/v1/callback
+```
+
+In Supabase `Authentication -> URL Configuration`, add:
+
+```text
+https://shopcontentvn-ai.onrender.com
+```
+
+to the allowed redirect URLs.
+
+## 4. Add Render environment variables
+
+Open Render:
+
+```text
+shopcontentvn-ai -> Environment
+```
+
+Add:
+
+```text
+SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+OPENAI_API_KEY=your-openai-api-key
+OPENAI_VISION_MODEL=gpt-4.1-mini
+```
+
+`SUPABASE_ANON_KEY` is public and is sent to the browser.
+
+`SUPABASE_SERVICE_ROLE_KEY` and `OPENAI_API_KEY` must only exist in Render
+environment variables. Never put them in GitHub or frontend JavaScript.
+
+## 5. Redeploy
+
+After saving environment variables, redeploy the Render service.
+
+The server verifies every Supabase access token and allows five combined AI
+requests per user per Vietnam calendar day. Both content generation and image
+analysis consume one request.
+```
+
+### supabase.sql
+
+```text
+create table if not exists public.ai_daily_usage (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  usage_date date not null,
+  used_count integer not null default 0 check (used_count >= 0),
+  updated_at timestamptz not null default now(),
+  primary key (user_id, usage_date)
+);
+
+alter table public.ai_daily_usage enable row level security;
+
+create or replace function public.consume_daily_ai_quota(
+  p_user_id uuid,
+  p_daily_limit integer default 5
+)
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  current_used integer;
+  vietnam_date date := timezone('Asia/Ho_Chi_Minh', now())::date;
+begin
+  insert into public.ai_daily_usage (user_id, usage_date, used_count, updated_at)
+  values (p_user_id, vietnam_date, 1, now())
+  on conflict (user_id, usage_date)
+  do update
+    set used_count = public.ai_daily_usage.used_count + 1,
+        updated_at = now()
+    where public.ai_daily_usage.used_count < p_daily_limit
+  returning used_count into current_used;
+
+  if current_used is null then
+    return -1;
+  end if;
+
+  return greatest(p_daily_limit - current_used, 0);
+end;
+$$;
+
+create or replace function public.get_daily_ai_remaining(
+  p_user_id uuid,
+  p_daily_limit integer default 5
+)
+returns integer
+language sql
+security definer
+set search_path = public
+as $$
+  select greatest(
+    p_daily_limit - coalesce(
+      (
+        select used_count
+        from public.ai_daily_usage
+        where user_id = p_user_id
+          and usage_date = timezone('Asia/Ho_Chi_Minh', now())::date
+      ),
+      0
+    ),
+    0
+  );
+$$;
+
+revoke all on function public.consume_daily_ai_quota(uuid, integer) from public, anon, authenticated;
+revoke all on function public.get_daily_ai_remaining(uuid, integer) from public, anon, authenticated;
+grant execute on function public.consume_daily_ai_quota(uuid, integer) to service_role;
+grant execute on function public.get_daily_ai_remaining(uuid, integer) to service_role;
 ```
 
 ### render.yaml
@@ -2905,6 +3472,16 @@ services:
     envVars:
       - key: OPENAI_MODEL
         value: gpt-4o-mini
+      - key: OPENAI_VISION_MODEL
+        value: gpt-4.1-mini
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
 ```
 
 ### requirements.txt

@@ -32,8 +32,18 @@ const analyzeImagesButton = document.querySelector("#analyzeImages");
 const clearImagesButton = document.querySelector("#clearImages");
 const analysisStatus = document.querySelector("#analysisStatus");
 const analysisWarning = document.querySelector("#analysisWarning");
+const loginButton = document.querySelector("#loginButton");
+const logoutButton = document.querySelector("#logoutButton");
+const userChip = document.querySelector("#userChip");
+const userAvatar = document.querySelector("#userAvatar");
+const userEmail = document.querySelector("#userEmail");
+const quotaBadge = document.querySelector("#quotaBadge");
+const quotaRemaining = document.querySelector("#quotaRemaining");
 
 let selectedImages = [];
+let authClient = null;
+let authSession = null;
+let authConfigured = false;
 
 const outputLabels = {
   caption: "Caption TikTok/Facebook",
@@ -152,6 +162,134 @@ const defaults = {
 
 const normalize = (value, fallback) => String(value || "").trim() || fallback;
 
+const updateQuotaDisplay = (remaining = 5) => {
+  const safeRemaining = Math.max(0, Number(remaining) || 0);
+  quotaRemaining.textContent = `${safeRemaining}/5`;
+  quotaBadge.hidden = !authSession;
+};
+
+const updateAuthDisplay = (session) => {
+  authSession = session;
+  const user = session?.user;
+  loginButton.hidden = Boolean(user);
+  userChip.hidden = !user;
+  quotaBadge.hidden = !user;
+
+  if (user) {
+    userEmail.textContent = user.email || "Tài khoản Google";
+    userAvatar.src = user.user_metadata?.avatar_url || "";
+    userAvatar.hidden = !userAvatar.src;
+  } else {
+    userEmail.textContent = "";
+    userAvatar.src = "";
+    updateQuotaDisplay(5);
+  }
+};
+
+const startGoogleLogin = async () => {
+  if (!authConfigured || !authClient) {
+    showToast("Chưa cấu hình đăng nhập Google");
+    return;
+  }
+
+  const { error } = await authClient.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${window.location.origin}${window.location.pathname}`,
+    },
+  });
+
+  if (error) showToast("Không mở được đăng nhập Google");
+};
+
+const requireAuthSession = async () => {
+  if (!authConfigured || !authClient) {
+    showToast("Chủ app chưa cấu hình Google login");
+    return null;
+  }
+
+  const { data } = await authClient.auth.getSession();
+  const session = data.session;
+  updateAuthDisplay(session);
+
+  if (!session) {
+    showToast("Đăng nhập Google để dùng AI");
+    await startGoogleLogin();
+    return null;
+  }
+
+  return session;
+};
+
+const authorizedFetch = async (url, options = {}) => {
+  const session = await requireAuthSession();
+  if (!session) {
+    const error = new Error("Authentication required");
+    error.name = "AuthRequiredError";
+    throw error;
+  }
+
+  const headers = new Headers(options.headers || {});
+  headers.set("Authorization", `Bearer ${session.access_token}`);
+  const response = await fetch(url, { ...options, headers });
+
+  if (response.status === 401) {
+    updateAuthDisplay(null);
+    const error = new Error("Session expired");
+    error.name = "AuthRequiredError";
+    throw error;
+  }
+
+  if (response.status === 429) {
+    updateQuotaDisplay(0);
+    const error = new Error("Daily quota reached");
+    error.name = "QuotaExceededError";
+    throw error;
+  }
+
+  return response;
+};
+
+const refreshQuota = async () => {
+  if (!authSession) return;
+
+  try {
+    const response = await authorizedFetch("/api/quota");
+    if (!response.ok) return;
+    const data = await response.json();
+    updateQuotaDisplay(data.remaining);
+  } catch (error) {
+    if (error.name !== "AuthRequiredError") {
+      console.warn("Could not refresh quota", error);
+    }
+  }
+};
+
+const initializeAuth = async () => {
+  try {
+    const response = await fetch("/api/config");
+    const config = await response.json();
+    authConfigured = Boolean(config.supabaseUrl && config.supabaseAnonKey && window.supabase);
+
+    if (!authConfigured) {
+      loginButton.querySelector("span:last-child").textContent = "Chưa cấu hình Google";
+      return;
+    }
+
+    authClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+    const { data } = await authClient.auth.getSession();
+    updateAuthDisplay(data.session);
+    if (data.session) await refreshQuota();
+
+    authClient.auth.onAuthStateChange((_event, session) => {
+      updateAuthDisplay(session);
+      if (session) window.setTimeout(refreshQuota, 0);
+    });
+  } catch (error) {
+    loginButton.querySelector("span:last-child").textContent = "Đăng nhập chưa sẵn sàng";
+  }
+};
+
 const sentenceCase = (value) => {
   const clean = normalize(value, "");
   return clean.charAt(0).toUpperCase() + clean.slice(1);
@@ -249,7 +387,7 @@ const analyzeImagesWithApi = async () => {
   const timeoutId = window.setTimeout(() => controller.abort(), 30000);
 
   try {
-    const response = await fetch("/api/analyze-image", {
+    const response = await authorizedFetch("/api/analyze-image", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -259,7 +397,9 @@ const analyzeImagesWithApi = async () => {
     });
 
     if (!response.ok) throw new Error(`Analyze failed: ${response.status}`);
-    return response.json();
+    const data = await response.json();
+    if (typeof data.remaining === "number") updateQuotaDisplay(data.remaining);
+    return data;
   } finally {
     window.clearTimeout(timeoutId);
   }
@@ -327,7 +467,7 @@ const generateWithApi = async (input) => {
   let response;
 
   try {
-    response = await fetch("/api/generate", {
+    response = await authorizedFetch("/api/generate", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -344,6 +484,7 @@ const generateWithApi = async (input) => {
   }
 
   const data = await response.json();
+  if (typeof data.remaining === "number") updateQuotaDisplay(data.remaining);
   return data.content || data;
 };
 
@@ -453,6 +594,11 @@ const simulateGenerate = async () => {
     renderContent(content);
     showToast("Đã tạo bằng AI");
   } catch (error) {
+    if (error.name === "AuthRequiredError") return;
+    if (error.name === "QuotaExceededError") {
+      showToast("Bạn đã dùng hết 5 lượt AI hôm nay");
+      return;
+    }
     renderContent(buildContent(input));
     showToast(error.name === "AbortError" ? "AI phản hồi chậm, đã dùng bản nhanh" : "Đã dùng bản dự phòng");
   } finally {
@@ -581,6 +727,11 @@ analyzeImagesButton.addEventListener("click", async () => {
     applyImageAnalysis(result.analysis || result);
     showToast(result.mode === "openai" ? "Đã phân tích ảnh" : "Đã điền brief mẫu");
   } catch (error) {
+    if (error.name === "AuthRequiredError") return;
+    if (error.name === "QuotaExceededError") {
+      showToast("Bạn đã dùng hết 5 lượt AI hôm nay");
+      return;
+    }
     showToast(error.name === "AbortError" ? "Phân tích quá lâu, thử lại sau" : "Chưa phân tích được ảnh");
   } finally {
     analysisStatus.hidden = true;
@@ -653,6 +804,15 @@ document.querySelectorAll(".copy-button").forEach((button) => {
 copyAllButton.addEventListener("click", () => copyText(getAllOutput()));
 copyAllTopButton.addEventListener("click", () => copyText(getAllOutput()));
 
+loginButton.addEventListener("click", startGoogleLogin);
+
+logoutButton.addEventListener("click", async () => {
+  if (!authClient) return;
+  await authClient.auth.signOut({ scope: "local" });
+  updateAuthDisplay(null);
+  showToast("Đã đăng xuất");
+});
+
 if (feedbackForm) {
   feedbackForm.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -680,3 +840,4 @@ if (feedbackForm) {
 
 updateBriefQuality();
 renderVariantPlayer();
+initializeAuth();

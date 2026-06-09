@@ -134,6 +134,95 @@ main {
   gap: 8px;
 }
 
+.auth-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.google-login-button,
+.user-chip,
+.quota-badge {
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.google-login-button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--text);
+  padding: 0 13px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.google-mark {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #4285f4;
+  background: white;
+  font-weight: 950;
+}
+
+.quota-badge {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 12px;
+}
+
+.quota-badge span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.quota-badge strong {
+  color: var(--yellow);
+  font-size: 13px;
+}
+
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 250px;
+  padding: 5px 7px 5px 5px;
+}
+
+.user-chip img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  object-fit: cover;
+}
+
+.user-chip > span {
+  overflow: hidden;
+  color: var(--soft);
+  font-size: 12px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-chip button {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 9px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.07);
+}
+
 .site-nav a,
 .ghost-button,
 .secondary-button,
@@ -1269,6 +1358,15 @@ pre {
 }
 
 @media (max-width: 1160px) {
+  .site-header {
+    flex-wrap: wrap;
+  }
+
+  .site-nav {
+    order: 3;
+    width: 100%;
+  }
+
   .hero-stage,
   .studio-shell {
     grid-template-columns: 1fr;
@@ -1317,6 +1415,11 @@ pre {
     width: 100%;
     overflow-x: auto;
     padding-bottom: 2px;
+  }
+
+  .auth-area {
+    width: 100%;
+    flex-wrap: wrap;
   }
 
   .hero {

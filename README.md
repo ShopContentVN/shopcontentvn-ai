@@ -6,6 +6,8 @@ App demo cho seller Viet:
 - Chon kenh ban va tone.
 - Tao caption, mo ta Shopee, hook video va kich ban livestream.
 - Upload 1-3 anh san pham de AI goi y brief.
+- Dang nhap Google de dung AI.
+- Gioi han 5 luot AI moi ngay cho moi tai khoan.
 - Copy tung phan hoac copy tat ca.
 
 Chay local:
@@ -36,3 +38,5 @@ python server.py
 ```
 
 Tren Render, them `OPENAI_API_KEY` trong Environment. Khong ghi API key vao `app.js`, `server.py` hoac GitHub.
+
+Google login va quota can Supabase. Xem `SUPABASE_SETUP.md` va chay `supabase.sql`.
