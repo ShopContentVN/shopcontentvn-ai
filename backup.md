@@ -1,6 +1,6 @@
 ﻿# ShopContentVN AI - Auto Backup
 
-Last updated: 2026-06-08 13:43:17
+Last updated: 2026-06-09 08:19:57
 
 ## Project
 
@@ -53,6 +53,7 @@ python server.py
         <a href="#tool">Studio</a>
         <a href="#examples">Ví dụ</a>
         <a href="#submit">Góp ý</a>
+        <a href="#contact">Liên hệ</a>
         <button type="button" id="copyAllTop" class="ghost-button">Copy output</button>
       </nav>
     </header>
@@ -299,7 +300,7 @@ python server.py
           <div class="card-head">
             <div>
               <p class="eyebrow">Generated workspace</p>
-              <h2>Output sẵn để đăng</h2>
+              <h2>Chọn bản hợp ý nhất</h2>
             </div>
             <button type="button" id="copyAll" class="text-button">Copy tất cả</button>
           </div>
@@ -309,50 +310,41 @@ python server.py
             <span>Đang dựng caption, mô tả, hook và kịch bản...</span>
           </div>
 
-          <div class="output-grid" id="outputGrid">
-            <article class="output-card highlight">
-              <div class="output-head">
-                <div>
-                  <span class="tag">01</span>
-                  <strong>Caption TikTok/Facebook</strong>
-                </div>
-                <button type="button" class="copy-button" data-copy="captionOutput">Copy</button>
-              </div>
-              <pre id="captionOutput">Nhập sản phẩm rồi bấm "Tạo bộ nội dung".</pre>
-            </article>
+          <div class="result-tabs" role="tablist" aria-label="Loại nội dung">
+            <button type="button" class="result-tab active" data-output-type="caption">Caption</button>
+            <button type="button" class="result-tab" data-output-type="description">Mô tả Shopee</button>
+            <button type="button" class="result-tab" data-output-type="hooks">Hook video</button>
+            <button type="button" class="result-tab" data-output-type="live">Livestream</button>
+          </div>
 
-            <article class="output-card">
-              <div class="output-head">
-                <div>
-                  <span class="tag">02</span>
-                  <strong>Mô tả Shopee</strong>
-                </div>
-                <button type="button" class="copy-button" data-copy="descriptionOutput">Copy</button>
+          <article class="result-player" id="outputGrid">
+            <div class="result-player-head">
+              <div>
+                <span class="result-kicker" id="resultTypeLabel">Caption TikTok/Facebook</span>
+                <strong id="variantLabel">Phương án 1 / 6</strong>
               </div>
-              <pre id="descriptionOutput">Mô tả sản phẩm sẽ nằm ở đây.</pre>
-            </article>
+              <button type="button" class="copy-button" id="copyCurrent">Copy bản này</button>
+            </div>
 
-            <article class="output-card">
-              <div class="output-head">
-                <div>
-                  <span class="tag">03</span>
-                  <strong>Hook video</strong>
-                </div>
-                <button type="button" class="copy-button" data-copy="hooksOutput">Copy</button>
-              </div>
-              <pre id="hooksOutput">App sẽ gợi ý 3-5 câu mở đầu video.</pre>
-            </article>
+            <pre id="currentOutput">Nhập sản phẩm rồi bấm "Tạo bộ nội dung".</pre>
 
-            <article class="output-card">
-              <div class="output-head">
-                <div>
-                  <span class="tag">04</span>
-                  <strong>Kịch bản livestream</strong>
-                </div>
-                <button type="button" class="copy-button" data-copy="liveOutput">Copy</button>
-              </div>
-              <pre id="liveOutput">Kịch bản live ngắn sẽ nằm ở đây.</pre>
-            </article>
+            <div class="result-controls">
+              <button type="button" class="icon-button" id="previousVariant" aria-label="Phương án trước" title="Phương án trước">←</button>
+              <div class="variant-dots" id="variantDots" aria-label="Các phương án"></div>
+              <button type="button" class="icon-button" id="nextVariant" aria-label="Phương án tiếp theo" title="Phương án tiếp theo">→</button>
+            </div>
+          </article>
+
+          <div class="result-note">
+            <span>6 phương án mỗi loại</span>
+            <p>Không hợp bản đầu thì chuyển tiếp, chỉnh nhẹ rồi đăng. Không cần generate lại từ đầu.</p>
+          </div>
+
+          <div class="source-outputs" hidden>
+            <pre id="captionOutput">Nhập sản phẩm rồi bấm "Tạo bộ nội dung".</pre>
+            <pre id="descriptionOutput">Mô tả sản phẩm sẽ nằm ở đây.</pre>
+            <pre id="hooksOutput">App sẽ gợi ý 3-5 câu mở đầu video.</pre>
+            <pre id="liveOutput">Kịch bản live ngắn sẽ nằm ở đây.</pre>
           </div>
         </section>
       </section>
@@ -408,7 +400,49 @@ python server.py
           </button>
         </form>
       </section>
+
+      <section id="contact" class="contact-section">
+        <div class="contact-copy">
+          <p class="eyebrow">Liên hệ ShopContentVN</p>
+          <h2>Đang bán hàng mà bí content? Gửi thẳng tình huống cho tụi mình.</h2>
+          <p>
+            ShopContentVN đang ở giai đoạn beta. Mọi câu hỏi, lỗi app và đề xuất template đều được
+            dùng để cải thiện sản phẩm cho seller Việt.
+          </p>
+        </div>
+        <div class="contact-grid">
+          <a href="mailto:shopcontentvn@gmail.com">
+            <span>Email</span>
+            <strong>shopcontentvn@gmail.com</strong>
+          </a>
+          <a href="https://x.com/ShopContentVN" target="_blank" rel="noreferrer">
+            <span>Kênh cập nhật</span>
+            <strong>@ShopContentVN trên X</strong>
+          </a>
+          <article>
+            <span>Phản hồi</span>
+            <strong>Trả lời trong 24-48 giờ</strong>
+          </article>
+        </div>
+      </section>
     </main>
+
+    <footer class="site-footer">
+      <div>
+        <a class="brand footer-brand" href="#top">
+          <span class="brand-logo">SC</span>
+          <span><strong>ShopContentVN</strong><small>AI Studio cho seller Việt</small></span>
+        </a>
+        <p>Công cụ đang beta. Nội dung AI cần được shop kiểm tra trước khi đăng.</p>
+      </div>
+      <div class="footer-links">
+        <a href="#templates">Templates</a>
+        <a href="#tool">Content Studio</a>
+        <a href="#submit">Gửi góp ý</a>
+        <a href="#contact">Liên hệ</a>
+      </div>
+      <small>© 2026 ShopContentVN. Built for Vietnamese sellers.</small>
+    </footer>
 
     <div id="toast" role="status" aria-live="polite"></div>
     <script src="./app.js"></script>
@@ -1175,6 +1209,146 @@ select:focus {
   gap: 14px;
 }
 
+.result-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.result-tab {
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.045);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.result-tab:hover,
+.result-tab.active {
+  border-color: rgba(32, 245, 166, 0.48);
+  color: #06100c;
+  background: var(--green);
+}
+
+.result-player {
+  overflow: hidden;
+  border: 1px solid rgba(32, 245, 166, 0.3);
+  border-radius: 22px;
+  background:
+    linear-gradient(145deg, rgba(32, 245, 166, 0.1), transparent 42%),
+    rgba(16, 23, 34, 0.98);
+}
+
+.result-player-head {
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border-bottom: 1px solid var(--line);
+  padding: 14px 16px;
+}
+
+.result-player-head strong,
+.result-kicker {
+  display: block;
+}
+
+.result-kicker {
+  margin-bottom: 4px;
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+#currentOutput {
+  min-height: 410px;
+  max-height: 560px;
+  overflow: auto;
+  padding: 24px;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.result-controls {
+  min-height: 66px;
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  gap: 14px;
+  border-top: 1px solid var(--line);
+  padding: 10px 14px;
+}
+
+.icon-button {
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.07);
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.icon-button:hover {
+  border-color: var(--green);
+  color: #06100c;
+  background: var(--green);
+}
+
+.variant-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.variant-dot {
+  width: 10px;
+  height: 10px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0;
+}
+
+.variant-dot.active {
+  width: 26px;
+  border-radius: 999px;
+  background: var(--green);
+}
+
+.result-note {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: center;
+  margin-top: 12px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 12px 14px;
+}
+
+.result-note span {
+  color: var(--yellow);
+  font-size: 12px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.result-note p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .output-card {
   overflow: hidden;
   border: 1px solid var(--line);
@@ -1256,6 +1430,99 @@ pre {
   margin-bottom: 56px;
 }
 
+.contact-section {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(480px, 1.2fr);
+  gap: 24px;
+  align-items: end;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background:
+    linear-gradient(130deg, rgba(69, 216, 255, 0.12), transparent 42%),
+    var(--panel);
+  box-shadow: var(--shadow);
+  padding: 28px;
+  margin: 18px 0 24px;
+}
+
+.contact-copy h2 {
+  max-width: 650px;
+  font-size: clamp(30px, 4vw, 50px);
+  line-height: 1.04;
+}
+
+.contact-copy > p:last-child {
+  max-width: 620px;
+  margin: 16px 0 0;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.contact-grid a,
+.contact-grid article {
+  display: grid;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.055);
+  padding: 17px;
+}
+
+.contact-grid a:hover {
+  border-color: rgba(32, 245, 166, 0.5);
+  background: rgba(32, 245, 166, 0.08);
+}
+
+.contact-grid span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.site-footer {
+  position: relative;
+  z-index: 1;
+  width: min(1240px, calc(100% - 36px));
+  display: grid;
+  grid-template-columns: 1.2fr 1fr auto;
+  gap: 24px;
+  align-items: end;
+  border-top: 1px solid var(--line);
+  margin: 0 auto;
+  padding: 28px 0 34px;
+}
+
+.site-footer p,
+.site-footer > small {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.site-footer p {
+  max-width: 460px;
+  margin: 12px 0 0;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.footer-links a {
+  color: var(--soft);
+  font-size: 14px;
+  font-weight: 800;
+}
+
 .feedback-form {
   border: 1px solid var(--line);
   border-radius: 22px;
@@ -1305,7 +1572,9 @@ pre {
   .hero-strip,
   .before-after-grid,
   .submit-panel,
-  .section-head {
+  .section-head,
+  .contact-section,
+  .site-footer {
     grid-template-columns: 1fr;
   }
 
@@ -1316,7 +1585,8 @@ pre {
 
 @media (max-width: 720px) {
   .site-header,
-  main {
+  main,
+  .site-footer {
     width: min(100% - 20px, 1240px);
   }
 
@@ -1343,7 +1613,8 @@ pre {
   .brief-card,
   .result-card,
   .submit-panel,
-  .example-section {
+  .example-section,
+  .contact-section {
     border-radius: 20px;
   }
 
@@ -1353,7 +1624,8 @@ pre {
   .brief-card,
   .result-card,
   .submit-panel,
-  .example-section {
+  .example-section,
+  .contact-section {
     padding: 18px;
   }
 
@@ -1367,6 +1639,19 @@ pre {
 
   .console-body,
   .field-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .result-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #currentOutput {
+    min-height: 330px;
+    padding: 18px;
+  }
+
+  .result-note {
     grid-template-columns: 1fr;
   }
 
@@ -1396,6 +1681,30 @@ const outputs = {
   description: document.querySelector("#descriptionOutput"),
   hooks: document.querySelector("#hooksOutput"),
   live: document.querySelector("#liveOutput"),
+};
+
+const currentOutput = document.querySelector("#currentOutput");
+const resultTypeLabel = document.querySelector("#resultTypeLabel");
+const variantLabel = document.querySelector("#variantLabel");
+const variantDots = document.querySelector("#variantDots");
+const previousVariant = document.querySelector("#previousVariant");
+const nextVariant = document.querySelector("#nextVariant");
+const copyCurrentButton = document.querySelector("#copyCurrent");
+
+const outputLabels = {
+  caption: "Caption TikTok/Facebook",
+  description: "Mô tả Shopee",
+  hooks: "Hook video",
+  live: "Kịch bản livestream",
+};
+
+let activeOutputType = "caption";
+let activeVariantIndex = 0;
+let outputVariants = {
+  caption: ['Nhập sản phẩm rồi bấm "Tạo bộ nội dung".'],
+  description: ["Mô tả sản phẩm sẽ nằm ở đây."],
+  hooks: ["App sẽ gợi ý các câu mở đầu video."],
+  live: ["Kịch bản live ngắn sẽ nằm ở đây."],
 };
 
 const samples = {
@@ -1568,11 +1877,80 @@ const generateWithApi = async (input) => {
   return data.content || data;
 };
 
+const buildVariants = (content, input) => {
+  const benefits = splitBenefits(input.benefits);
+  const benefitText = benefits.join(", ") || input.benefits;
+  const firstBenefit = benefits[0] || input.benefits;
+
+  return {
+    caption: [
+      content.caption,
+      `Ai đang ${input.pain} thì xem thử ${input.product} này.\n\nĐiểm mình thích nhất là ${benefitText}.\n\nHợp với ${input.customer}. Cần shop tư vấn kỹ hơn thì comment "tư vấn" nhé.`,
+      `${sentenceCase(input.product)} có gì đáng để cân nhắc?\n\n1. ${firstBenefit}.\n2. Hợp với ${input.customer}.\n3. Giải quyết nhu cầu: ${input.pain}.\n\nNhắn shop để xem mẫu phù hợp.`,
+      `Đừng vội mua ${input.product} nếu chưa kiểm tra 3 điều này:\n\n- Có hợp với ${input.customer} không?\n- Có giải quyết được chuyện ${input.pain} không?\n- Điểm nổi bật có đúng nhu cầu: ${benefitText}?\n\nCần chọn nhanh, cứ nhắn shop.`,
+      `Một món đáng lưu lại cho ${input.customer}: ${input.product}.\n\n${sentenceCase(input.pain)} là chuyện nhiều khách gặp. Mẫu này tập trung vào ${benefitText}.\n\nComment "mẫu" để shop gửi thông tin.`,
+      `Review nhanh ${input.product}:\n\nƯu điểm: ${benefitText}.\nPhù hợp: ${input.customer}.\nNhu cầu chính: ${input.pain}.\n\nNếu bạn đang phân vân, inbox shop để được tư vấn đúng nhu cầu.`,
+    ],
+    description: [
+      content.description,
+      `${sentenceCase(input.product)}\n\nPHÙ HỢP CHO\n${input.customer}.\n\nĐIỂM NỔI BẬT\n${buildBullets(benefits, "-")}\n\nNHU CẦU SẢN PHẨM GIẢI QUYẾT\n${sentenceCase(input.pain)}.\n\nVui lòng nhắn shop nếu cần tư vấn thêm về mẫu, màu hoặc cách sử dụng.`,
+      `${sentenceCase(input.product)} là lựa chọn dành cho ${input.customer}, đặc biệt khi bạn đang ${input.pain}.\n\nLợi ích chính:\n${buildBullets(benefits, "•")}\n\nTrước khi đặt hàng, khách nên kiểm tra kỹ phân loại, thông số và chính sách đổi trả của shop.`,
+      `THÔNG TIN SẢN PHẨM\n\nTên: ${sentenceCase(input.product)}\nKhách hàng phù hợp: ${input.customer}\nĐiểm nổi bật: ${benefitText}\nNhu cầu: ${input.pain}\n\nShop hỗ trợ tư vấn trước khi đặt hàng để khách chọn đúng phiên bản phù hợp.`,
+      `${sentenceCase(input.product)}\n\nVì sao sản phẩm này đáng cân nhắc?\n${buildBullets(benefits, "-")}\n\nSản phẩm phù hợp cho ${input.customer}. Nếu bạn đang ${input.pain}, hãy nhắn shop để được tư vấn trước khi mua.`,
+      `MÔ TẢ NGẮN\n${sentenceCase(input.product)} dành cho ${input.customer}, nổi bật với ${benefitText}.\n\nLƯU Ý\nHình ảnh và màu sắc có thể khác nhẹ tùy thiết bị. Khách vui lòng đọc kỹ phân loại và liên hệ shop khi cần hỗ trợ.`,
+    ],
+    hooks: [
+      content.hooks,
+      `1. ${sentenceCase(input.pain)}? Có thể bạn đang chọn sai ${input.product}.\n\n2. Trước khi mua ${input.product}, nhớ kiểm tra điểm này.\n\n3. Đây là lý do ${input.customer} đang chú ý tới ${firstBenefit}.`,
+      `1. Tôi ước mình biết điều này trước khi mua ${input.product}.\n\n2. 3 lỗi khiến bạn ${input.pain}.\n\n3. ${sentenceCase(firstBenefit)} có thật sự đáng tiền không?`,
+      `1. Dừng lại 5 giây nếu bạn đang ${input.pain}.\n\n2. Đừng mua ${input.product} chỉ vì đang giảm giá.\n\n3. Cách chọn ${input.product} phù hợp cho ${input.customer}.`,
+      `1. Trước và sau khi chọn đúng ${input.product} khác nhau thế nào?\n\n2. Vì sao nhiều người mua ${input.product} rồi vẫn không hài lòng?\n\n3. Một điểm nhỏ nhưng quyết định sản phẩm có hợp bạn hay không.`,
+      `1. Shop test nhanh ${input.product} cho ai đang phân vân.\n\n2. Nếu bạn cần ${firstBenefit}, xem hết video này.\n\n3. Có nên mua ${input.product} không? Đây là câu trả lời ngắn gọn.`,
+    ],
+    live: [
+      content.live,
+      `MỞ LIVE\n"Ai đang ${input.pain} thì ở lại với shop một chút."\n\nGIỚI THIỆU\n"Hôm nay shop có ${input.product}, hợp với ${input.customer}. Điểm nổi bật là ${benefitText}."\n\nCTA\n"Comment 1 để shop tư vấn mẫu phù hợp."`,
+      `HOOK\n"Đừng chốt ${input.product} chỉ vì giá rẻ nha."\n\nTƯ VẤN\n"Quan trọng nhất là sản phẩm phải hợp với ${input.customer} và nhu cầu ${input.pain}."\n\nCHỐT\n"Ai cần ${firstBenefit}, comment 'cần' để shop kiểm tra mẫu."`,
+      `MỞ ĐẦU\n"Shop nói nhanh 3 lý do mẫu ${input.product} này đáng xem."\n\nLÝ DO\n"Thứ nhất: ${firstBenefit}. Thứ hai: hợp với ${input.customer}. Thứ ba: dễ tư vấn theo nhu cầu thật."\n\nCTA\n"Muốn xem cận sản phẩm thì comment số 2."`,
+      `TÌNH HUỐNG\n"Nhiều khách nhắn shop vì ${input.pain}."\n\nGIẢI PHÁP\n"Mẫu ${input.product} tập trung vào ${benefitText}."\n\nCHỐT ĐƠN\n"Ai muốn shop chọn giúp thì để lại nhu cầu trong comment."`,
+      `MỞ LIVE NGẮN\n"Ai mới vào live, shop đang giới thiệu ${input.product} cho ${input.customer}."\n\nĐIỂM CHÍNH\n"${sentenceCase(benefitText)}."\n\nKẾT\n"Comment 'giá' để shop gửi thông tin và phân loại hiện có."`,
+    ],
+  };
+};
+
+const renderVariantPlayer = () => {
+  const variants = outputVariants[activeOutputType] || [""];
+  activeVariantIndex = Math.min(activeVariantIndex, variants.length - 1);
+  currentOutput.textContent = variants[activeVariantIndex];
+  resultTypeLabel.textContent = outputLabels[activeOutputType];
+  variantLabel.textContent = `Phương án ${activeVariantIndex + 1} / ${variants.length}`;
+
+  document.querySelectorAll(".result-tab").forEach((button) => {
+    button.classList.toggle("active", button.dataset.outputType === activeOutputType);
+  });
+
+  variantDots.replaceChildren();
+  variants.forEach((_, index) => {
+    const dot = document.createElement("button");
+    dot.type = "button";
+    dot.className = `variant-dot${index === activeVariantIndex ? " active" : ""}`;
+    dot.setAttribute("aria-label", `Xem phương án ${index + 1}`);
+    dot.addEventListener("click", () => {
+      activeVariantIndex = index;
+      renderVariantPlayer();
+    });
+    variantDots.appendChild(dot);
+  });
+};
+
 const renderContent = (content) => {
   outputs.caption.textContent = content.caption;
   outputs.description.textContent = content.description;
   outputs.hooks.textContent = content.hooks;
   outputs.live.textContent = content.live;
+  outputVariants = buildVariants(content, getFormData());
+  activeVariantIndex = 0;
+  renderVariantPlayer();
 };
 
 const showToast = (message) => {
@@ -1695,6 +2073,15 @@ clearFormButton.addEventListener("click", () => {
   outputs.description.textContent = "Mô tả sản phẩm sẽ nằm ở đây.";
   outputs.hooks.textContent = "App sẽ gợi ý 3-5 câu mở đầu video.";
   outputs.live.textContent = "Kịch bản live ngắn sẽ nằm ở đây.";
+  outputVariants = {
+    caption: [outputs.caption.textContent],
+    description: [outputs.description.textContent],
+    hooks: [outputs.hooks.textContent],
+    live: [outputs.live.textContent],
+  };
+  activeOutputType = "caption";
+  activeVariantIndex = 0;
+  renderVariantPlayer();
   updateBriefQuality();
   showToast("Đã reset");
 });
@@ -1707,7 +2094,32 @@ document.querySelectorAll("[data-template]").forEach((button) => {
   button.addEventListener("click", () => applyTemplate(button.dataset.template));
 });
 
+document.querySelectorAll(".result-tab").forEach((button) => {
+  button.addEventListener("click", () => {
+    activeOutputType = button.dataset.outputType;
+    activeVariantIndex = 0;
+    renderVariantPlayer();
+  });
+});
+
+previousVariant.addEventListener("click", () => {
+  const variants = outputVariants[activeOutputType];
+  activeVariantIndex = (activeVariantIndex - 1 + variants.length) % variants.length;
+  renderVariantPlayer();
+});
+
+nextVariant.addEventListener("click", () => {
+  const variants = outputVariants[activeOutputType];
+  activeVariantIndex = (activeVariantIndex + 1) % variants.length;
+  renderVariantPlayer();
+});
+
+copyCurrentButton.addEventListener("click", () => {
+  copyText(outputVariants[activeOutputType][activeVariantIndex]);
+});
+
 document.querySelectorAll(".copy-button").forEach((button) => {
+  if (!button.dataset.copy) return;
   button.addEventListener("click", () => {
     const target = document.querySelector(`#${button.dataset.copy}`);
     copyText(target.textContent);
@@ -1743,6 +2155,7 @@ if (feedbackForm) {
 }
 
 updateBriefQuality();
+renderVariantPlayer();
 ```
 
 ### server.py

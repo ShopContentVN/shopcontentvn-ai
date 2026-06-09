@@ -17,6 +17,30 @@ const outputs = {
   live: document.querySelector("#liveOutput"),
 };
 
+const currentOutput = document.querySelector("#currentOutput");
+const resultTypeLabel = document.querySelector("#resultTypeLabel");
+const variantLabel = document.querySelector("#variantLabel");
+const variantDots = document.querySelector("#variantDots");
+const previousVariant = document.querySelector("#previousVariant");
+const nextVariant = document.querySelector("#nextVariant");
+const copyCurrentButton = document.querySelector("#copyCurrent");
+
+const outputLabels = {
+  caption: "Caption TikTok/Facebook",
+  description: "Mô tả Shopee",
+  hooks: "Hook video",
+  live: "Kịch bản livestream",
+};
+
+let activeOutputType = "caption";
+let activeVariantIndex = 0;
+let outputVariants = {
+  caption: ['Nhập sản phẩm rồi bấm "Tạo bộ nội dung".'],
+  description: ["Mô tả sản phẩm sẽ nằm ở đây."],
+  hooks: ["App sẽ gợi ý các câu mở đầu video."],
+  live: ["Kịch bản live ngắn sẽ nằm ở đây."],
+};
+
 const samples = {
   shirt: {
     productName: "áo thun nữ form rộng",
@@ -187,11 +211,80 @@ const generateWithApi = async (input) => {
   return data.content || data;
 };
 
+const buildVariants = (content, input) => {
+  const benefits = splitBenefits(input.benefits);
+  const benefitText = benefits.join(", ") || input.benefits;
+  const firstBenefit = benefits[0] || input.benefits;
+
+  return {
+    caption: [
+      content.caption,
+      `Ai đang ${input.pain} thì xem thử ${input.product} này.\n\nĐiểm mình thích nhất là ${benefitText}.\n\nHợp với ${input.customer}. Cần shop tư vấn kỹ hơn thì comment "tư vấn" nhé.`,
+      `${sentenceCase(input.product)} có gì đáng để cân nhắc?\n\n1. ${firstBenefit}.\n2. Hợp với ${input.customer}.\n3. Giải quyết nhu cầu: ${input.pain}.\n\nNhắn shop để xem mẫu phù hợp.`,
+      `Đừng vội mua ${input.product} nếu chưa kiểm tra 3 điều này:\n\n- Có hợp với ${input.customer} không?\n- Có giải quyết được chuyện ${input.pain} không?\n- Điểm nổi bật có đúng nhu cầu: ${benefitText}?\n\nCần chọn nhanh, cứ nhắn shop.`,
+      `Một món đáng lưu lại cho ${input.customer}: ${input.product}.\n\n${sentenceCase(input.pain)} là chuyện nhiều khách gặp. Mẫu này tập trung vào ${benefitText}.\n\nComment "mẫu" để shop gửi thông tin.`,
+      `Review nhanh ${input.product}:\n\nƯu điểm: ${benefitText}.\nPhù hợp: ${input.customer}.\nNhu cầu chính: ${input.pain}.\n\nNếu bạn đang phân vân, inbox shop để được tư vấn đúng nhu cầu.`,
+    ],
+    description: [
+      content.description,
+      `${sentenceCase(input.product)}\n\nPHÙ HỢP CHO\n${input.customer}.\n\nĐIỂM NỔI BẬT\n${buildBullets(benefits, "-")}\n\nNHU CẦU SẢN PHẨM GIẢI QUYẾT\n${sentenceCase(input.pain)}.\n\nVui lòng nhắn shop nếu cần tư vấn thêm về mẫu, màu hoặc cách sử dụng.`,
+      `${sentenceCase(input.product)} là lựa chọn dành cho ${input.customer}, đặc biệt khi bạn đang ${input.pain}.\n\nLợi ích chính:\n${buildBullets(benefits, "•")}\n\nTrước khi đặt hàng, khách nên kiểm tra kỹ phân loại, thông số và chính sách đổi trả của shop.`,
+      `THÔNG TIN SẢN PHẨM\n\nTên: ${sentenceCase(input.product)}\nKhách hàng phù hợp: ${input.customer}\nĐiểm nổi bật: ${benefitText}\nNhu cầu: ${input.pain}\n\nShop hỗ trợ tư vấn trước khi đặt hàng để khách chọn đúng phiên bản phù hợp.`,
+      `${sentenceCase(input.product)}\n\nVì sao sản phẩm này đáng cân nhắc?\n${buildBullets(benefits, "-")}\n\nSản phẩm phù hợp cho ${input.customer}. Nếu bạn đang ${input.pain}, hãy nhắn shop để được tư vấn trước khi mua.`,
+      `MÔ TẢ NGẮN\n${sentenceCase(input.product)} dành cho ${input.customer}, nổi bật với ${benefitText}.\n\nLƯU Ý\nHình ảnh và màu sắc có thể khác nhẹ tùy thiết bị. Khách vui lòng đọc kỹ phân loại và liên hệ shop khi cần hỗ trợ.`,
+    ],
+    hooks: [
+      content.hooks,
+      `1. ${sentenceCase(input.pain)}? Có thể bạn đang chọn sai ${input.product}.\n\n2. Trước khi mua ${input.product}, nhớ kiểm tra điểm này.\n\n3. Đây là lý do ${input.customer} đang chú ý tới ${firstBenefit}.`,
+      `1. Tôi ước mình biết điều này trước khi mua ${input.product}.\n\n2. 3 lỗi khiến bạn ${input.pain}.\n\n3. ${sentenceCase(firstBenefit)} có thật sự đáng tiền không?`,
+      `1. Dừng lại 5 giây nếu bạn đang ${input.pain}.\n\n2. Đừng mua ${input.product} chỉ vì đang giảm giá.\n\n3. Cách chọn ${input.product} phù hợp cho ${input.customer}.`,
+      `1. Trước và sau khi chọn đúng ${input.product} khác nhau thế nào?\n\n2. Vì sao nhiều người mua ${input.product} rồi vẫn không hài lòng?\n\n3. Một điểm nhỏ nhưng quyết định sản phẩm có hợp bạn hay không.`,
+      `1. Shop test nhanh ${input.product} cho ai đang phân vân.\n\n2. Nếu bạn cần ${firstBenefit}, xem hết video này.\n\n3. Có nên mua ${input.product} không? Đây là câu trả lời ngắn gọn.`,
+    ],
+    live: [
+      content.live,
+      `MỞ LIVE\n"Ai đang ${input.pain} thì ở lại với shop một chút."\n\nGIỚI THIỆU\n"Hôm nay shop có ${input.product}, hợp với ${input.customer}. Điểm nổi bật là ${benefitText}."\n\nCTA\n"Comment 1 để shop tư vấn mẫu phù hợp."`,
+      `HOOK\n"Đừng chốt ${input.product} chỉ vì giá rẻ nha."\n\nTƯ VẤN\n"Quan trọng nhất là sản phẩm phải hợp với ${input.customer} và nhu cầu ${input.pain}."\n\nCHỐT\n"Ai cần ${firstBenefit}, comment 'cần' để shop kiểm tra mẫu."`,
+      `MỞ ĐẦU\n"Shop nói nhanh 3 lý do mẫu ${input.product} này đáng xem."\n\nLÝ DO\n"Thứ nhất: ${firstBenefit}. Thứ hai: hợp với ${input.customer}. Thứ ba: dễ tư vấn theo nhu cầu thật."\n\nCTA\n"Muốn xem cận sản phẩm thì comment số 2."`,
+      `TÌNH HUỐNG\n"Nhiều khách nhắn shop vì ${input.pain}."\n\nGIẢI PHÁP\n"Mẫu ${input.product} tập trung vào ${benefitText}."\n\nCHỐT ĐƠN\n"Ai muốn shop chọn giúp thì để lại nhu cầu trong comment."`,
+      `MỞ LIVE NGẮN\n"Ai mới vào live, shop đang giới thiệu ${input.product} cho ${input.customer}."\n\nĐIỂM CHÍNH\n"${sentenceCase(benefitText)}."\n\nKẾT\n"Comment 'giá' để shop gửi thông tin và phân loại hiện có."`,
+    ],
+  };
+};
+
+const renderVariantPlayer = () => {
+  const variants = outputVariants[activeOutputType] || [""];
+  activeVariantIndex = Math.min(activeVariantIndex, variants.length - 1);
+  currentOutput.textContent = variants[activeVariantIndex];
+  resultTypeLabel.textContent = outputLabels[activeOutputType];
+  variantLabel.textContent = `Phương án ${activeVariantIndex + 1} / ${variants.length}`;
+
+  document.querySelectorAll(".result-tab").forEach((button) => {
+    button.classList.toggle("active", button.dataset.outputType === activeOutputType);
+  });
+
+  variantDots.replaceChildren();
+  variants.forEach((_, index) => {
+    const dot = document.createElement("button");
+    dot.type = "button";
+    dot.className = `variant-dot${index === activeVariantIndex ? " active" : ""}`;
+    dot.setAttribute("aria-label", `Xem phương án ${index + 1}`);
+    dot.addEventListener("click", () => {
+      activeVariantIndex = index;
+      renderVariantPlayer();
+    });
+    variantDots.appendChild(dot);
+  });
+};
+
 const renderContent = (content) => {
   outputs.caption.textContent = content.caption;
   outputs.description.textContent = content.description;
   outputs.hooks.textContent = content.hooks;
   outputs.live.textContent = content.live;
+  outputVariants = buildVariants(content, getFormData());
+  activeVariantIndex = 0;
+  renderVariantPlayer();
 };
 
 const showToast = (message) => {
@@ -314,6 +407,15 @@ clearFormButton.addEventListener("click", () => {
   outputs.description.textContent = "Mô tả sản phẩm sẽ nằm ở đây.";
   outputs.hooks.textContent = "App sẽ gợi ý 3-5 câu mở đầu video.";
   outputs.live.textContent = "Kịch bản live ngắn sẽ nằm ở đây.";
+  outputVariants = {
+    caption: [outputs.caption.textContent],
+    description: [outputs.description.textContent],
+    hooks: [outputs.hooks.textContent],
+    live: [outputs.live.textContent],
+  };
+  activeOutputType = "caption";
+  activeVariantIndex = 0;
+  renderVariantPlayer();
   updateBriefQuality();
   showToast("Đã reset");
 });
@@ -326,7 +428,32 @@ document.querySelectorAll("[data-template]").forEach((button) => {
   button.addEventListener("click", () => applyTemplate(button.dataset.template));
 });
 
+document.querySelectorAll(".result-tab").forEach((button) => {
+  button.addEventListener("click", () => {
+    activeOutputType = button.dataset.outputType;
+    activeVariantIndex = 0;
+    renderVariantPlayer();
+  });
+});
+
+previousVariant.addEventListener("click", () => {
+  const variants = outputVariants[activeOutputType];
+  activeVariantIndex = (activeVariantIndex - 1 + variants.length) % variants.length;
+  renderVariantPlayer();
+});
+
+nextVariant.addEventListener("click", () => {
+  const variants = outputVariants[activeOutputType];
+  activeVariantIndex = (activeVariantIndex + 1) % variants.length;
+  renderVariantPlayer();
+});
+
+copyCurrentButton.addEventListener("click", () => {
+  copyText(outputVariants[activeOutputType][activeVariantIndex]);
+});
+
 document.querySelectorAll(".copy-button").forEach((button) => {
+  if (!button.dataset.copy) return;
   button.addEventListener("click", () => {
     const target = document.querySelector(`#${button.dataset.copy}`);
     copyText(target.textContent);
@@ -362,3 +489,4 @@ if (feedbackForm) {
 }
 
 updateBriefQuality();
+renderVariantPlayer();

@@ -21,6 +21,7 @@
         <a href="#tool">Studio</a>
         <a href="#examples">Ví dụ</a>
         <a href="#submit">Góp ý</a>
+        <a href="#contact">Liên hệ</a>
         <button type="button" id="copyAllTop" class="ghost-button">Copy output</button>
       </nav>
     </header>
@@ -267,7 +268,7 @@
           <div class="card-head">
             <div>
               <p class="eyebrow">Generated workspace</p>
-              <h2>Output sẵn để đăng</h2>
+              <h2>Chọn bản hợp ý nhất</h2>
             </div>
             <button type="button" id="copyAll" class="text-button">Copy tất cả</button>
           </div>
@@ -277,50 +278,41 @@
             <span>Đang dựng caption, mô tả, hook và kịch bản...</span>
           </div>
 
-          <div class="output-grid" id="outputGrid">
-            <article class="output-card highlight">
-              <div class="output-head">
-                <div>
-                  <span class="tag">01</span>
-                  <strong>Caption TikTok/Facebook</strong>
-                </div>
-                <button type="button" class="copy-button" data-copy="captionOutput">Copy</button>
-              </div>
-              <pre id="captionOutput">Nhập sản phẩm rồi bấm "Tạo bộ nội dung".</pre>
-            </article>
+          <div class="result-tabs" role="tablist" aria-label="Loại nội dung">
+            <button type="button" class="result-tab active" data-output-type="caption">Caption</button>
+            <button type="button" class="result-tab" data-output-type="description">Mô tả Shopee</button>
+            <button type="button" class="result-tab" data-output-type="hooks">Hook video</button>
+            <button type="button" class="result-tab" data-output-type="live">Livestream</button>
+          </div>
 
-            <article class="output-card">
-              <div class="output-head">
-                <div>
-                  <span class="tag">02</span>
-                  <strong>Mô tả Shopee</strong>
-                </div>
-                <button type="button" class="copy-button" data-copy="descriptionOutput">Copy</button>
+          <article class="result-player" id="outputGrid">
+            <div class="result-player-head">
+              <div>
+                <span class="result-kicker" id="resultTypeLabel">Caption TikTok/Facebook</span>
+                <strong id="variantLabel">Phương án 1 / 6</strong>
               </div>
-              <pre id="descriptionOutput">Mô tả sản phẩm sẽ nằm ở đây.</pre>
-            </article>
+              <button type="button" class="copy-button" id="copyCurrent">Copy bản này</button>
+            </div>
 
-            <article class="output-card">
-              <div class="output-head">
-                <div>
-                  <span class="tag">03</span>
-                  <strong>Hook video</strong>
-                </div>
-                <button type="button" class="copy-button" data-copy="hooksOutput">Copy</button>
-              </div>
-              <pre id="hooksOutput">App sẽ gợi ý 3-5 câu mở đầu video.</pre>
-            </article>
+            <pre id="currentOutput">Nhập sản phẩm rồi bấm "Tạo bộ nội dung".</pre>
 
-            <article class="output-card">
-              <div class="output-head">
-                <div>
-                  <span class="tag">04</span>
-                  <strong>Kịch bản livestream</strong>
-                </div>
-                <button type="button" class="copy-button" data-copy="liveOutput">Copy</button>
-              </div>
-              <pre id="liveOutput">Kịch bản live ngắn sẽ nằm ở đây.</pre>
-            </article>
+            <div class="result-controls">
+              <button type="button" class="icon-button" id="previousVariant" aria-label="Phương án trước" title="Phương án trước">←</button>
+              <div class="variant-dots" id="variantDots" aria-label="Các phương án"></div>
+              <button type="button" class="icon-button" id="nextVariant" aria-label="Phương án tiếp theo" title="Phương án tiếp theo">→</button>
+            </div>
+          </article>
+
+          <div class="result-note">
+            <span>6 phương án mỗi loại</span>
+            <p>Không hợp bản đầu thì chuyển tiếp, chỉnh nhẹ rồi đăng. Không cần generate lại từ đầu.</p>
+          </div>
+
+          <div class="source-outputs" hidden>
+            <pre id="captionOutput">Nhập sản phẩm rồi bấm "Tạo bộ nội dung".</pre>
+            <pre id="descriptionOutput">Mô tả sản phẩm sẽ nằm ở đây.</pre>
+            <pre id="hooksOutput">App sẽ gợi ý 3-5 câu mở đầu video.</pre>
+            <pre id="liveOutput">Kịch bản live ngắn sẽ nằm ở đây.</pre>
           </div>
         </section>
       </section>
@@ -376,7 +368,49 @@
           </button>
         </form>
       </section>
+
+      <section id="contact" class="contact-section">
+        <div class="contact-copy">
+          <p class="eyebrow">Liên hệ ShopContentVN</p>
+          <h2>Đang bán hàng mà bí content? Gửi thẳng tình huống cho tụi mình.</h2>
+          <p>
+            ShopContentVN đang ở giai đoạn beta. Mọi câu hỏi, lỗi app và đề xuất template đều được
+            dùng để cải thiện sản phẩm cho seller Việt.
+          </p>
+        </div>
+        <div class="contact-grid">
+          <a href="mailto:shopcontentvn@gmail.com">
+            <span>Email</span>
+            <strong>shopcontentvn@gmail.com</strong>
+          </a>
+          <a href="https://x.com/ShopContentVN" target="_blank" rel="noreferrer">
+            <span>Kênh cập nhật</span>
+            <strong>@ShopContentVN trên X</strong>
+          </a>
+          <article>
+            <span>Phản hồi</span>
+            <strong>Trả lời trong 24-48 giờ</strong>
+          </article>
+        </div>
+      </section>
     </main>
+
+    <footer class="site-footer">
+      <div>
+        <a class="brand footer-brand" href="#top">
+          <span class="brand-logo">SC</span>
+          <span><strong>ShopContentVN</strong><small>AI Studio cho seller Việt</small></span>
+        </a>
+        <p>Công cụ đang beta. Nội dung AI cần được shop kiểm tra trước khi đăng.</p>
+      </div>
+      <div class="footer-links">
+        <a href="#templates">Templates</a>
+        <a href="#tool">Content Studio</a>
+        <a href="#submit">Gửi góp ý</a>
+        <a href="#contact">Liên hệ</a>
+      </div>
+      <small>© 2026 ShopContentVN. Built for Vietnamese sellers.</small>
+    </footer>
 
     <div id="toast" role="status" aria-live="polite"></div>
     <script src="./app.js"></script>
