@@ -195,7 +195,7 @@ const startGoogleLogin = async () => {
   const { error } = await authClient.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${window.location.origin}${window.location.pathname}`,
+      redirectTo: `${window.location.origin}/`,
     },
   });
 
@@ -276,16 +276,38 @@ const initializeAuth = async () => {
       return;
     }
 
-    authClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
-    const { data } = await authClient.auth.getSession();
+    authClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+      },
+    });
+
+    const callbackError =
+      new URLSearchParams(window.location.search).get("error_description") ||
+      new URLSearchParams(window.location.hash.slice(1)).get("error_description");
+    if (callbackError) {
+      showToast(`Google login lỗi: ${callbackError}`);
+      window.history.replaceState({}, document.title, `${window.location.origin}/`);
+    }
+
+    const { data, error } = await authClient.auth.getSession();
+    if (error) throw error;
     updateAuthDisplay(data.session);
     if (data.session) await refreshQuota();
 
-    authClient.auth.onAuthStateChange((_event, session) => {
+    authClient.auth.onAuthStateChange((event, session) => {
       updateAuthDisplay(session);
-      if (session) window.setTimeout(refreshQuota, 0);
+      if (session) {
+        window.setTimeout(refreshQuota, 0);
+        if (event === "SIGNED_IN" && (window.location.search || window.location.hash)) {
+          window.history.replaceState({}, document.title, `${window.location.origin}/`);
+        }
+      }
     });
   } catch (error) {
+    console.error("Auth initialization failed", error);
     loginButton.querySelector("span:last-child").textContent = "Đăng nhập chưa sẵn sàng";
   }
 };
