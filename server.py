@@ -197,7 +197,7 @@ def call_quota_rpc(function_name, user_id, daily_limit=DAILY_AI_LIMIT):
 def consume_daily_quota(user_id):
     remaining = call_quota_rpc("consume_daily_ai_quota", user_id)
     if remaining < 0:
-        raise ApiError("Bạn đã dùng hết 5 lượt AI hôm nay.", 429)
+        raise ApiError("Bạn đã dùng hết 5 lượt phân tích ảnh hôm nay.", 429)
     return remaining
 
 
@@ -361,10 +361,9 @@ class Handler(SimpleHTTPRequestHandler):
                 self.respond_json(save_feedback(payload))
                 return
 
-            user = verify_supabase_user(self.headers.get("Authorization"))
-            remaining = consume_daily_quota(user["id"])
-
             if self.path == "/api/analyze-image":
+                user = verify_supabase_user(self.headers.get("Authorization"))
+                remaining = consume_daily_quota(user["id"])
                 analysis, mode = call_openai_vision(payload)
                 self.respond_json(
                     {
@@ -375,12 +374,11 @@ class Handler(SimpleHTTPRequestHandler):
                 )
                 return
 
-            content, mode = call_openai(payload)
             self.respond_json(
                 {
-                    "mode": mode,
-                    "content": content,
-                    "remaining": remaining,
+                    "mode": "free",
+                    "content": fallback_content(payload),
+                    "remaining": None,
                 }
             )
         except ApiError as error:

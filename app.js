@@ -162,6 +162,20 @@ const defaults = {
 
 const normalize = (value, fallback) => String(value || "").trim() || fallback;
 
+const friendlyAuthError = (message = "") => {
+  const clean = String(message).toLowerCase();
+  if (clean.includes("unable to exchange external code")) {
+    return "Google chưa kết nối đúng với Supabase. Chủ app cần cập nhật lại Client Secret.";
+  }
+  if (clean.includes("redirect_uri_mismatch")) {
+    return "Google OAuth đang sai Redirect URI.";
+  }
+  if (clean.includes("access_denied")) {
+    return "Bạn đã hủy hoặc chưa được cấp quyền đăng nhập.";
+  }
+  return "Đăng nhập Google chưa thành công. Vui lòng thử lại.";
+};
+
 const updateQuotaDisplay = (remaining = 5) => {
   const safeRemaining = Math.max(0, Number(remaining) || 0);
   quotaRemaining.textContent = `${safeRemaining}/5`;
@@ -288,7 +302,8 @@ const initializeAuth = async () => {
       new URLSearchParams(window.location.search).get("error_description") ||
       new URLSearchParams(window.location.hash.slice(1)).get("error_description");
     if (callbackError) {
-      showToast(`Google login lỗi: ${callbackError}`);
+      console.error("Google OAuth callback failed", callbackError);
+      showToast(friendlyAuthError(callbackError));
       window.history.replaceState({}, document.title, `${window.location.origin}/`);
     }
 
@@ -483,33 +498,6 @@ const buildContent = (input) => {
   return { caption, description, hooks, live };
 };
 
-const generateWithApi = async (input) => {
-  const controller = new AbortController();
-  const timeoutId = window.setTimeout(() => controller.abort(), 12000);
-  let response;
-
-  try {
-    response = await authorizedFetch("/api/generate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(input),
-      signal: controller.signal,
-    });
-  } finally {
-    window.clearTimeout(timeoutId);
-  }
-
-  if (!response.ok) {
-    throw new Error(`Generate failed: ${response.status}`);
-  }
-
-  const data = await response.json();
-  if (typeof data.remaining === "number") updateQuotaDisplay(data.remaining);
-  return data.content || data;
-};
-
 const buildVariants = (content, input) => {
   const benefits = splitBenefits(input.benefits);
   const benefitText = benefits.join(", ") || input.benefits;
@@ -612,27 +600,8 @@ const simulateGenerate = async () => {
   generateButton.querySelector("span").textContent = "Đang tạo nội dung...";
 
   try {
-    const session = await getCurrentSession();
-    if (!session) {
-      renderContent(buildContent(input));
-      showToast("Đã tạo bản miễn phí. Đăng nhập để dùng AI thật");
-      return;
-    }
-
-    const content = await generateWithApi(input);
-    renderContent(content);
-    showToast("Đã tạo bằng AI");
-  } catch (error) {
-    if (error.name === "QuotaExceededError") {
-      showToast("Bạn đã dùng hết 5 lượt AI hôm nay");
-      return;
-    }
     renderContent(buildContent(input));
-    if (error.name === "AuthRequiredError") {
-      showToast("Phiên đăng nhập lỗi, đã chuyển sang bản miễn phí");
-    } else {
-      showToast(error.name === "AbortError" ? "AI phản hồi chậm, đã dùng bản nhanh" : "Đã dùng bản dự phòng");
-    }
+    showToast("Đã tạo miễn phí, không trừ lượt");
   } finally {
     loadingState.hidden = true;
     outputGrid.style.opacity = "1";
@@ -760,11 +729,11 @@ analyzeImagesButton.addEventListener("click", async () => {
     showToast(result.mode === "openai" ? "Đã phân tích ảnh" : "Đã điền brief mẫu");
   } catch (error) {
     if (error.name === "AuthRequiredError") {
-      showToast("Đăng nhập Google để AI đọc ảnh; tạo content chữ vẫn miễn phí");
+      showToast("Đăng nhập Google để phân tích ảnh; tạo content chữ vẫn miễn phí");
       return;
     }
     if (error.name === "QuotaExceededError") {
-      showToast("Bạn đã dùng hết 5 lượt AI hôm nay");
+      showToast("Bạn đã dùng hết 5 lượt phân tích ảnh hôm nay");
       return;
     }
     showToast(error.name === "AbortError" ? "Phân tích quá lâu, thử lại sau" : "Chưa phân tích được ảnh");
