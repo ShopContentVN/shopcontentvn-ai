@@ -37,8 +37,11 @@ Bạn đang phân tích ảnh sản phẩm để hỗ trợ seller Việt viết
 Chỉ mô tả chi tiết nhìn thấy rõ trong ảnh. Không đoán chất liệu, công dụng, kích thước,
 thành phần, thương hiệu, chứng nhận hoặc hiệu quả nếu ảnh không thể hiện chắc chắn.
 Trả về JSON hợp lệ, không markdown, với các key:
-productName, customer, painPoint, benefits, category, confidence, notes.
+productName, customer, painPoint, benefits, category, productSummary, visualDetails, confidence, notes.
 Mỗi value là string tiếng Việt. benefits là chuỗi 3-5 ý ngăn cách bằng dấu phẩy.
+productSummary là đoạn giới thiệu 2-4 câu, kết hợp thông tin người dùng đã nhập với những gì nhìn thấy
+trong ảnh. Nếu người dùng đã nhập tên sản phẩm, khách hàng hoặc điểm nổi bật thì phải giữ và bổ sung,
+không được thay bằng mô tả chung chung. visualDetails mô tả màu sắc, kiểu dáng, bao bì và chi tiết nhìn thấy.
 notes phải nhắc người dùng xác minh các thông tin không thể biết chỉ từ ảnh.
 """.strip()
 
@@ -89,6 +92,8 @@ def fallback_image_analysis():
         "painPoint": "chưa biết sản phẩm có phù hợp với nhu cầu thực tế hay không",
         "benefits": "hình ảnh trực quan, dễ giới thiệu, có thể tư vấn theo nhu cầu khách",
         "category": "chưa xác định",
+        "productSummary": "Sản phẩm trong ảnh đang được giới thiệu cho khách mua online. Hãy bổ sung tên sản phẩm, đối tượng phù hợp và lợi ích thật để có phần giới thiệu đầy đủ hơn.",
+        "visualDetails": "Ảnh sản phẩm do người dùng cung cấp.",
         "confidence": "demo",
         "notes": "Chưa có API Vision nên app chưa thực sự đọc ảnh. Hãy kiểm tra và sửa brief trước khi tạo nội dung.",
     }
@@ -267,7 +272,13 @@ def call_openai_vision(payload):
     if not api_key:
         return fallback_image_analysis(), "demo"
 
-    content = [{"type": "input_text", "text": VISION_PROMPT}]
+    current_brief = payload.get("currentBrief") or {}
+    prompt = (
+        f"{VISION_PROMPT}\n\n"
+        "Thông tin người dùng đã nhập, phải ưu tiên giữ lại và làm đầy đủ hơn:\n"
+        + json.dumps(current_brief, ensure_ascii=False)
+    )
+    content = [{"type": "input_text", "text": prompt}]
     content.extend(
         {"type": "input_image", "image_url": image, "detail": "low"}
         for image in images

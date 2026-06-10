@@ -7,7 +7,9 @@ App demo cho seller Viet:
 - Chon nganh hang va muc tieu noi dung.
 - Tao caption, mo ta Shopee, hook video va kich ban livestream.
 - Upload 1-3 anh san pham de AI goi y brief.
-- Tu dong dung 3 poster san pham 4:5 de tai xuong.
+- Tu dong dung 3 poster san pham 4:5 khong gan thuong hieu cua app.
+- Bam vao poster de xem lon, kiem tra roi moi tai xuong.
+- AI ket hop anh voi thong tin nguoi dung da nhap de viet gioi thieu san pham day du.
 - Tao content chu mien phi, khong can dang nhap.
 - Dang nhap Google khi can AI phan tich anh.
 - Gioi han 5 luot phan tich anh moi ngay cho moi tai khoan.

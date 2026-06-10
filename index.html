@@ -285,6 +285,12 @@
             <div class="analysis-warning" id="analysisWarning" hidden>
               AI chỉ phân tích chi tiết nhìn thấy được. Hãy tự kiểm tra chất liệu, công dụng và thông số trước khi đăng.
             </div>
+
+            <div class="analysis-summary" id="analysisSummary" hidden>
+              <span>AI hiểu sản phẩm</span>
+              <strong id="analysisSummaryTitle">Thông tin sản phẩm</strong>
+              <p id="analysisSummaryText"></p>
+            </div>
           </section>
 
           <div id="examples" class="preset-row" aria-label="Sản phẩm mẫu">
@@ -322,6 +328,16 @@
           <label class="field">
             <span>Điểm nổi bật</span>
             <input id="benefits" name="benefits" type="text" placeholder="Ví dụ: che dáng, chất mềm, dễ phối đồ" autocomplete="off" />
+          </label>
+
+          <label class="field">
+            <span>Giới thiệu sản phẩm</span>
+            <textarea
+              id="productSummary"
+              name="productSummary"
+              rows="4"
+              placeholder="AI sẽ tổng hợp tên sản phẩm, khách hàng, nhu cầu và điểm nổi bật thành một đoạn giới thiệu hoàn chỉnh."
+            ></textarea>
           </label>
 
           <div class="field-grid">
@@ -404,7 +420,7 @@
               <button type="button" class="text-button" id="rebuildCreatives">Dựng lại ảnh</button>
             </div>
             <div class="creative-empty" id="creativeEmpty">
-              Kéo ảnh sản phẩm vào form rồi tạo nội dung. App sẽ dựng 3 ảnh 4:5 để tải xuống.
+              Kéo ảnh sản phẩm vào form rồi tạo nội dung. App sẽ dựng 3 ảnh 4:5 sạch, không gắn tên ShopContentVN.
             </div>
             <div class="creative-grid" id="creativeGrid" hidden></div>
           </section>
@@ -512,6 +528,26 @@
       </div>
       <small>© 2026 ShopContentVN. Built for Vietnamese sellers.</small>
     </footer>
+
+    <div class="creative-modal" id="creativeModal" hidden>
+      <button type="button" class="creative-modal-backdrop" id="creativeModalBackdrop" aria-label="Đóng xem ảnh"></button>
+      <section class="creative-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="creativeModalTitle">
+        <div class="creative-modal-head">
+          <div>
+            <span>Xem trước ảnh 4:5</span>
+            <strong id="creativeModalTitle">Ảnh bán hàng</strong>
+          </div>
+          <button type="button" class="creative-modal-close" id="creativeModalClose" aria-label="Đóng" title="Đóng">×</button>
+        </div>
+        <div class="creative-modal-stage">
+          <img id="creativeModalImage" alt="Xem trước ảnh bán hàng" />
+        </div>
+        <div class="creative-modal-actions">
+          <p>Kiểm tra nội dung và bố cục trước khi tải ảnh.</p>
+          <button type="button" class="download-creative" id="creativeModalDownload">Tải ảnh này</button>
+        </div>
+      </section>
+    </div>
 
     <div id="toast" role="status" aria-live="polite"></div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

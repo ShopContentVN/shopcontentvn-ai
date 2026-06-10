@@ -32,6 +32,9 @@ const analyzeImagesButton = document.querySelector("#analyzeImages");
 const clearImagesButton = document.querySelector("#clearImages");
 const analysisStatus = document.querySelector("#analysisStatus");
 const analysisWarning = document.querySelector("#analysisWarning");
+const analysisSummary = document.querySelector("#analysisSummary");
+const analysisSummaryTitle = document.querySelector("#analysisSummaryTitle");
+const analysisSummaryText = document.querySelector("#analysisSummaryText");
 const loginButton = document.querySelector("#loginButton");
 const logoutButton = document.querySelector("#logoutButton");
 const userChip = document.querySelector("#userChip");
@@ -42,9 +45,16 @@ const quotaRemaining = document.querySelector("#quotaRemaining");
 const creativeGrid = document.querySelector("#creativeGrid");
 const creativeEmpty = document.querySelector("#creativeEmpty");
 const rebuildCreativesButton = document.querySelector("#rebuildCreatives");
+const creativeModal = document.querySelector("#creativeModal");
+const creativeModalBackdrop = document.querySelector("#creativeModalBackdrop");
+const creativeModalClose = document.querySelector("#creativeModalClose");
+const creativeModalImage = document.querySelector("#creativeModalImage");
+const creativeModalTitle = document.querySelector("#creativeModalTitle");
+const creativeModalDownload = document.querySelector("#creativeModalDownload");
 
 let selectedImages = [];
 let generatedCreatives = [];
+let activeCreative = null;
 let authClient = null;
 let authSession = null;
 let authConfigured = false;
@@ -68,6 +78,8 @@ let outputVariants = {
 const samples = {
   shirt: {
     productName: "áo thun nữ form rộng",
+    category: "fashion",
+    contentGoal: "social",
     customer: "nữ 18-28 tuổi thích mặc thoải mái",
     painPoint: "muốn mặc đẹp nhưng sợ lộ bụng",
     channel: "TikTok Shop",
@@ -77,6 +89,8 @@ const samples = {
   },
   sunscreen: {
     productName: "kem chống nắng cho da dầu",
+    category: "beauty",
+    contentGoal: "shopee",
     customer: "người da dầu, dễ bí da",
     painPoint: "bôi chống nắng hay bị bóng mặt và nặng da",
     channel: "Shopee",
@@ -86,6 +100,8 @@ const samples = {
   },
   lamp: {
     productName: "đèn livestream để bàn",
+    category: "electronics",
+    contentGoal: "livestream",
     customer: "seller mới bán hàng online tại nhà",
     painPoint: "quay video bị tối, mặt và sản phẩm nhìn không rõ",
     channel: "TikTok Shop",
@@ -453,7 +469,17 @@ const analyzeImagesWithApi = async () => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ images: selectedImages }),
+      body: JSON.stringify({
+        images: selectedImages,
+        currentBrief: {
+          productName: form.elements.productName.value.trim(),
+          customer: form.elements.customer.value.trim(),
+          painPoint: form.elements.painPoint.value.trim(),
+          benefits: form.elements.benefits.value.trim(),
+          productSummary: form.elements.productSummary.value.trim(),
+          category: form.elements.category.value,
+        },
+      }),
       signal: controller.signal,
     });
 
@@ -472,14 +498,41 @@ const applyImageAnalysis = (analysis) => {
     customer: analysis.customer,
     painPoint: analysis.painPoint,
     benefits: analysis.benefits,
+    productSummary: analysis.productSummary,
   };
 
   Object.entries(fieldMap).forEach(([name, value]) => {
     if (value && form.elements[name]) form.elements[name].value = value;
   });
 
+  const categoryText = String(analysis.category || "").toLowerCase();
+  const categoryMatch = Object.entries({
+    beauty: ["mỹ phẩm", "skincare", "làm đẹp"],
+    fashion: ["thời trang", "quần áo", "váy", "áo"],
+    home: ["gia dụng", "nhà cửa", "nhà bếp"],
+    toys: ["đồ chơi", "trò chơi"],
+    food: ["đồ ăn", "thực phẩm", "đồ uống"],
+    electronics: ["điện tử", "thiết bị", "công nghệ"],
+    momBaby: ["mẹ và bé", "em bé", "trẻ sơ sinh"],
+    accessories: ["phụ kiện", "trang sức"],
+  }).find(([, keywords]) => keywords.some((keyword) => categoryText.includes(keyword)));
+  if (categoryMatch) form.elements.category.value = categoryMatch[0];
+
   updateBriefQuality();
   analysisWarning.hidden = false;
+  const summary = normalize(
+    analysis.productSummary,
+    buildProductSummary({
+      product: normalize(analysis.productName, form.elements.productName.value),
+      customer: normalize(analysis.customer, form.elements.customer.value),
+      pain: normalize(analysis.painPoint, form.elements.painPoint.value),
+      benefits: normalize(analysis.benefits, form.elements.benefits.value),
+    })
+  );
+  form.elements.productSummary.value = summary;
+  analysisSummaryTitle.textContent = normalize(analysis.productName, "Thông tin sản phẩm");
+  analysisSummaryText.textContent = summary;
+  analysisSummary.hidden = false;
 };
 
 const getFormData = () => {
@@ -492,9 +545,16 @@ const getFormData = () => {
     tone: normalize(data.get("tone"), "friendly"),
     detailLevel: normalize(data.get("detailLevel"), "balanced"),
     benefits: normalize(data.get("benefits"), defaults.benefits),
+    productSummary: normalize(data.get("productSummary"), ""),
     category: normalize(data.get("category"), "beauty"),
     goal: normalize(data.get("contentGoal"), "social"),
   };
+};
+
+const buildProductSummary = (input) => {
+  const benefits = splitBenefits(input.benefits);
+  const benefitText = benefits.slice(0, 3).join(", ") || input.benefits;
+  return `${sentenceCase(input.product)} phù hợp cho ${input.customer}. Sản phẩm hướng đến nhu cầu ${input.pain}, với các điểm nổi bật gồm ${benefitText}.`;
 };
 
 const loadCanvasImage = (source) =>
@@ -544,6 +604,44 @@ const wrapCanvasText = (context, text, maxWidth, maxLines = 3) => {
   return lines;
 };
 
+const drawCanvasText = (context, text, x, y, maxWidth, lineHeight, maxLines = 3) => {
+  const lines = wrapCanvasText(context, text, maxWidth, maxLines);
+  lines.forEach((line, index) => context.fillText(line, x, y + index * lineHeight));
+  return lines.length;
+};
+
+const safeFileName = (value) =>
+  String(value || "anh-san-pham")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 48) || "anh-san-pham";
+
+const downloadCreative = (creative) => {
+  if (!creative) return;
+  const link = document.createElement("a");
+  link.href = creative.dataUrl;
+  link.download = `${safeFileName(getFormData().product)}-${creative.variant + 1}.jpg`;
+  link.click();
+};
+
+const closeCreativeModal = () => {
+  creativeModal.hidden = true;
+  document.body.classList.remove("modal-open");
+  activeCreative = null;
+};
+
+const openCreativeModal = (creative) => {
+  activeCreative = creative;
+  creativeModalImage.src = creative.dataUrl;
+  creativeModalTitle.textContent = creative.label;
+  creativeModal.hidden = false;
+  document.body.classList.add("modal-open");
+  creativeModalClose.focus();
+};
+
 const renderCreativeCards = () => {
   creativeGrid.replaceChildren();
   creativeGrid.hidden = generatedCreatives.length === 0;
@@ -553,9 +651,17 @@ const renderCreativeCards = () => {
   generatedCreatives.forEach((creative, index) => {
     const card = document.createElement("article");
     card.className = "creative-card";
+    const previewButton = document.createElement("button");
+    previewButton.type = "button";
+    previewButton.className = "creative-preview";
+    previewButton.setAttribute("aria-label", `Xem lớn ${creative.label}`);
     const preview = document.createElement("img");
     preview.src = creative.dataUrl;
     preview.alt = `Ảnh bán hàng phương án ${index + 1}`;
+    const zoomHint = document.createElement("span");
+    zoomHint.textContent = "Xem lớn";
+    previewButton.append(preview, zoomHint);
+    previewButton.addEventListener("click", () => openCreativeModal(creative));
 
     const footer = document.createElement("div");
     footer.className = "creative-card-footer";
@@ -565,15 +671,10 @@ const renderCreativeCards = () => {
     downloadButton.type = "button";
     downloadButton.className = "download-creative";
     downloadButton.textContent = "Tải ảnh";
-    downloadButton.addEventListener("click", () => {
-      const link = document.createElement("a");
-      link.href = creative.dataUrl;
-      link.download = `shopcontentvn-${index + 1}.jpg`;
-      link.click();
-    });
+    downloadButton.addEventListener("click", () => downloadCreative(creative));
 
     footer.append(label, downloadButton);
-    card.append(preview, footer);
+    card.append(previewButton, footer);
     creativeGrid.appendChild(card);
   });
 };
@@ -589,78 +690,100 @@ const buildCreative = async (imageSource, input, variantIndex) => {
   const [light, accent, dark] = category.colors;
   const benefits = splitBenefits(input.benefits);
   const headline = variantIndex === 1 ? goal.label : input.product;
-  const supportingText =
-    variantIndex === 2
-      ? benefits.slice(0, 2).join(" • ")
-      : benefits[0] || `${category.label} dành cho bạn`;
+  const supportingText = benefits.slice(0, 3).join(" • ") || `${category.label} dành cho bạn`;
 
-  const gradient = context.createLinearGradient(0, 0, canvas.width, canvas.height);
-  gradient.addColorStop(0, variantIndex === 1 ? dark : light);
-  gradient.addColorStop(1, variantIndex === 2 ? accent : dark);
-  context.fillStyle = gradient;
-  context.fillRect(0, 0, canvas.width, canvas.height);
+  if (variantIndex === 0) {
+    context.fillStyle = "#f7f5f0";
+    context.fillRect(0, 0, 1080, 1350);
+    context.fillStyle = dark;
+    context.fillRect(0, 0, 1080, 116);
+    context.fillStyle = accent;
+    context.font = "900 25px Arial";
+    context.fillText(goal.badge, 64, 72);
 
-  context.globalAlpha = 0.16;
-  context.fillStyle = variantIndex === 1 ? light : accent;
-  context.save();
-  context.translate(850, 120);
-  context.rotate(-0.28);
-  context.fillRect(-40, -180, 220, 640);
-  context.restore();
-  context.save();
-  context.translate(80, 1140);
-  context.rotate(0.22);
-  context.fillRect(-180, -60, 540, 180);
-  context.restore();
-  context.globalAlpha = 1;
+    roundedRect(context, 48, 148, 984, 700, 28);
+    context.save();
+    context.clip();
+    context.filter = "brightness(1.07) contrast(1.04) saturate(1.03)";
+    drawCoverImage(context, image, 48, 148, 984, 700);
+    context.restore();
 
-  roundedRect(context, 54, 54, 972, 790, 42);
-  context.save();
-  context.clip();
-  context.filter = "brightness(1.06) contrast(1.05) saturate(1.06)";
-  drawCoverImage(context, image, 54, 54, 972, 790);
-  context.restore();
+    context.fillStyle = "#111315";
+    context.font = "900 64px Arial";
+    drawCanvasText(context, input.product, 64, 940, 930, 72, 2);
+    context.fillStyle = "#4a4f52";
+    context.font = "700 29px Arial";
+    drawCanvasText(context, supportingText, 66, 1110, 900, 42, 2);
+    context.fillStyle = accent;
+    roundedRect(context, 64, 1240, 950, 4, 2);
+    context.fill();
+  } else if (variantIndex === 1) {
+    context.fillStyle = light;
+    context.fillRect(0, 0, 1080, 1350);
+    context.fillStyle = dark;
+    roundedRect(context, 48, 48, 984, 1254, 38);
+    context.fill();
 
-  const imageFade = context.createLinearGradient(0, 560, 0, 850);
-  imageFade.addColorStop(0, "rgba(5,8,12,0)");
-  imageFade.addColorStop(1, "rgba(5,8,12,0.82)");
-  context.fillStyle = imageFade;
-  context.fillRect(54, 500, 972, 344);
+    roundedRect(context, 78, 78, 924, 620, 26);
+    context.save();
+    context.clip();
+    context.filter = "brightness(1.08) contrast(1.06) saturate(1.04)";
+    drawCoverImage(context, image, 78, 78, 924, 620);
+    context.restore();
 
-  context.fillStyle = accent;
-  roundedRect(context, 76, 76, 230, 58, 18);
-  context.fill();
-  context.fillStyle = dark;
-  context.font = "900 24px Arial";
-  context.fillText(goal.badge, 98, 114);
+    context.fillStyle = accent;
+    roundedRect(context, 78, 738, 260, 58, 18);
+    context.fill();
+    context.fillStyle = dark;
+    context.font = "900 23px Arial";
+    context.fillText(goal.badge, 104, 776);
+    context.fillStyle = "#ffffff";
+    context.font = "900 62px Arial";
+    drawCanvasText(context, input.product, 78, 888, 910, 70, 2);
 
-  context.fillStyle = "#ffffff";
-  context.font = "900 66px Arial";
-  wrapCanvasText(context, headline, 900, 2).forEach((line, index) =>
-    context.fillText(line, 76, 930 + index * 74)
-  );
+    benefits.slice(0, 3).forEach((benefit, index) => {
+      const y = 1080 + index * 68;
+      context.fillStyle = accent;
+      context.beginPath();
+      context.arc(94, y - 9, 8, 0, Math.PI * 2);
+      context.fill();
+      context.fillStyle = "#eaf0ed";
+      context.font = "700 27px Arial";
+      drawCanvasText(context, sentenceCase(benefit), 120, y, 830, 34, 1);
+    });
+  } else {
+    context.fillStyle = "#ffffff";
+    context.fillRect(0, 0, 1080, 1350);
+    context.fillStyle = accent;
+    context.fillRect(0, 0, 1080, 26);
+    context.fillStyle = "#17191c";
+    context.font = "900 25px Arial";
+    context.fillText(`${category.label.toUpperCase()}  /  ${goal.label.toUpperCase()}`, 64, 84);
+    context.font = "900 72px Arial";
+    drawCanvasText(context, headline, 64, 194, 930, 80, 2);
 
-  context.fillStyle = variantIndex === 0 ? light : "#ffffff";
-  context.font = "700 31px Arial";
-  wrapCanvasText(context, supportingText, 900, 2).forEach((line, index) =>
-    context.fillText(line, 78, 1098 + index * 42)
-  );
+    roundedRect(context, 64, 370, 952, 620, 30);
+    context.save();
+    context.clip();
+    context.filter = "brightness(1.06) contrast(1.06) saturate(1.02)";
+    drawCoverImage(context, image, 64, 370, 952, 620);
+    context.restore();
 
-  context.fillStyle = "rgba(255,255,255,0.16)";
-  roundedRect(context, 76, 1215, 928, 76, 22);
-  context.fill();
-  context.fillStyle = "#ffffff";
-  context.font = "800 25px Arial";
-  context.fillText(`${category.label}  •  ${goal.label}`, 104, 1262);
-  context.textAlign = "right";
-  context.fillStyle = accent;
-  context.font = "900 25px Arial";
-  context.fillText("ShopContentVN", 978, 1262);
-  context.textAlign = "left";
+    context.fillStyle = dark;
+    roundedRect(context, 64, 1030, 952, 246, 26);
+    context.fill();
+    context.fillStyle = "#ffffff";
+    context.font = "800 32px Arial";
+    drawCanvasText(context, input.customer, 96, 1100, 860, 42, 2);
+    context.fillStyle = accent;
+    context.font = "800 27px Arial";
+    drawCanvasText(context, supportingText, 96, 1208, 860, 36, 2);
+  }
 
   return {
     label: `${goal.label} · Mẫu ${variantIndex + 1}`,
     dataUrl: canvas.toDataURL("image/jpeg", 0.9),
+    variant: variantIndex,
   };
 };
 
@@ -707,10 +830,11 @@ const buildContent = (input) => {
   const benefits = splitBenefits(input.benefits);
   const benefitText = benefits.length ? benefits.join(", ") : input.benefits;
   const firstBenefit = benefits[0] || input.benefits;
+  const productSummary = input.productSummary || buildProductSummary(input);
 
   const caption = `${tone.opener} ${input.product}.\n\nVấn đề khách hay gặp:\n${input.pain}.\n\nĐiểm đáng chú ý:\n${buildBullets(benefits)}\n\nPhù hợp cho:\n${input.customer}.\n\n${tone.cta}${detailAddon(input.detailLevel, input, benefits)}`;
 
-  const description = `${sentenceCase(input.product)}\n\nNgành hàng: ${category.label}\nMục tiêu nội dung: ${goal.label}\n\n${input.product} phù hợp cho ${input.customer}. Sản phẩm tập trung vào nhu cầu: ${input.pain}.\n\nĐiểm nổi bật:\n${buildBullets(benefits, "-")}\n\nVì sao nên chọn:\n- Dễ hiểu lợi ích, dễ tư vấn cho khách.\n- Phù hợp để đăng ${input.channel} hoặc dùng làm mô tả sản phẩm.\n- Có thể biến thành caption, kịch bản video hoặc nội dung live.\n\nLưu ý: Shop nên bổ sung size, màu, chất liệu, chính sách đổi trả và hình thật nếu có.`;
+  const description = `${sentenceCase(input.product)}\n\nNgành hàng: ${category.label}\nMục tiêu nội dung: ${goal.label}\n\nGIỚI THIỆU SẢN PHẨM\n${productSummary}\n\nĐiểm nổi bật:\n${buildBullets(benefits, "-")}\n\nThông tin tư vấn nhanh:\n- Khách hàng phù hợp: ${input.customer}.\n- Nhu cầu chính: ${input.pain}.\n- Kênh sử dụng: ${input.channel}.\n\nLưu ý: Shop nên bổ sung giá, phân loại, kích thước, chất liệu, cách dùng và chính sách đổi trả nếu có.`;
 
   const hooks = `1. Nếu bạn đang ${input.pain}, xem thử ${input.product} này.\n\n2. 3 lý do ${input.customer} nên cân nhắc ${input.product}: ${firstBenefit}.\n\n3. Đừng chọn ${input.product} chỉ vì rẻ. Hãy nhìn vào điểm này trước: ${benefitText}.\n\n4. Mua online dễ sai nhất ở chỗ này: không biết sản phẩm có hợp nhu cầu thật không.\n\n5. Đây là cách shop tư vấn ${input.product} cho khách đang phân vân.`;
 
@@ -814,7 +938,11 @@ const updateBriefQuality = () => {
 };
 
 const simulateGenerate = async () => {
-  const input = getFormData();
+  let input = getFormData();
+  if (!input.productSummary) {
+    form.elements.productSummary.value = buildProductSummary(input);
+    input = getFormData();
+  }
   loadingState.hidden = false;
   outputGrid.style.opacity = "0.45";
   generateButton.disabled = true;
@@ -833,6 +961,8 @@ const simulateGenerate = async () => {
 };
 
 const fillSample = (sample) => {
+  form.elements.productSummary.value = "";
+  analysisSummary.hidden = true;
   Object.entries(sample).forEach(([key, value]) => {
     if (form.elements[key]) form.elements[key].value = value;
   });
@@ -935,6 +1065,7 @@ clearImagesButton.addEventListener("click", () => {
   selectedImages = [];
   generatedCreatives = [];
   analysisWarning.hidden = true;
+  analysisSummary.hidden = true;
   renderImagePreviews();
   renderCreativeCards();
   showToast("Đã xóa ảnh");
@@ -973,6 +1104,13 @@ fillDemoButton.addEventListener("click", () => fillSample(samples.shirt));
 
 rebuildCreativesButton.addEventListener("click", createProductCreatives);
 
+creativeModalBackdrop.addEventListener("click", closeCreativeModal);
+creativeModalClose.addEventListener("click", closeCreativeModal);
+creativeModalDownload.addEventListener("click", () => downloadCreative(activeCreative));
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !creativeModal.hidden) closeCreativeModal();
+});
+
 clearFormButton.addEventListener("click", () => {
   form.reset();
   outputs.caption.textContent = 'Nhập sản phẩm rồi bấm "Tạo bộ nội dung".';
@@ -987,6 +1125,7 @@ clearFormButton.addEventListener("click", () => {
   };
   activeOutputType = "caption";
   activeVariantIndex = 0;
+  analysisSummary.hidden = true;
   renderVariantPlayer();
   updateBriefQuality();
   showToast("Đã reset");
