@@ -196,33 +196,31 @@ const startGoogleLogin = async () => {
     provider: "google",
     options: {
       redirectTo: `${window.location.origin}/`,
+      queryParams: {
+        prompt: "select_account",
+      },
     },
   });
 
-  if (error) showToast("Không mở được đăng nhập Google");
+  if (error) {
+    console.error("Google login failed", error);
+    showToast(`Không mở được Google: ${error.message}`);
+  }
 };
 
-const requireAuthSession = async () => {
-  if (!authConfigured || !authClient) {
-    showToast("Chủ app chưa cấu hình Google login");
+const getCurrentSession = async () => {
+  if (!authConfigured || !authClient) return null;
+  const { data, error } = await authClient.auth.getSession();
+  if (error) {
+    console.warn("Could not read auth session", error);
     return null;
   }
-
-  const { data } = await authClient.auth.getSession();
-  const session = data.session;
-  updateAuthDisplay(session);
-
-  if (!session) {
-    showToast("Đăng nhập Google để dùng AI");
-    await startGoogleLogin();
-    return null;
-  }
-
-  return session;
+  updateAuthDisplay(data.session);
+  return data.session;
 };
 
 const authorizedFetch = async (url, options = {}) => {
-  const session = await requireAuthSession();
+  const session = await getCurrentSession();
   if (!session) {
     const error = new Error("Authentication required");
     error.name = "AuthRequiredError";
@@ -281,6 +279,8 @@ const initializeAuth = async () => {
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
+        flowType: "implicit",
+        storageKey: "shopcontentvn-auth",
       },
     });
 
@@ -612,17 +612,27 @@ const simulateGenerate = async () => {
   generateButton.querySelector("span").textContent = "Đang tạo nội dung...";
 
   try {
+    const session = await getCurrentSession();
+    if (!session) {
+      renderContent(buildContent(input));
+      showToast("Đã tạo bản miễn phí. Đăng nhập để dùng AI thật");
+      return;
+    }
+
     const content = await generateWithApi(input);
     renderContent(content);
     showToast("Đã tạo bằng AI");
   } catch (error) {
-    if (error.name === "AuthRequiredError") return;
     if (error.name === "QuotaExceededError") {
       showToast("Bạn đã dùng hết 5 lượt AI hôm nay");
       return;
     }
     renderContent(buildContent(input));
-    showToast(error.name === "AbortError" ? "AI phản hồi chậm, đã dùng bản nhanh" : "Đã dùng bản dự phòng");
+    if (error.name === "AuthRequiredError") {
+      showToast("Phiên đăng nhập lỗi, đã chuyển sang bản miễn phí");
+    } else {
+      showToast(error.name === "AbortError" ? "AI phản hồi chậm, đã dùng bản nhanh" : "Đã dùng bản dự phòng");
+    }
   } finally {
     loadingState.hidden = true;
     outputGrid.style.opacity = "1";
@@ -749,7 +759,10 @@ analyzeImagesButton.addEventListener("click", async () => {
     applyImageAnalysis(result.analysis || result);
     showToast(result.mode === "openai" ? "Đã phân tích ảnh" : "Đã điền brief mẫu");
   } catch (error) {
-    if (error.name === "AuthRequiredError") return;
+    if (error.name === "AuthRequiredError") {
+      showToast("Đăng nhập Google để AI đọc ảnh; tạo content chữ vẫn miễn phí");
+      return;
+    }
     if (error.name === "QuotaExceededError") {
       showToast("Bạn đã dùng hết 5 lượt AI hôm nay");
       return;

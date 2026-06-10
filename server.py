@@ -123,8 +123,12 @@ def parse_model_json(output_text):
     return json.loads(clean)
 
 
-def supabase_is_configured():
-    return bool(SUPABASE_URL and SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY)
+def supabase_auth_is_configured():
+    return bool(SUPABASE_URL and SUPABASE_ANON_KEY)
+
+
+def supabase_quota_is_configured():
+    return bool(supabase_auth_is_configured() and SUPABASE_SERVICE_ROLE_KEY)
 
 
 def request_json(url, method="GET", headers=None, payload=None, timeout=12):
@@ -141,7 +145,7 @@ def request_json(url, method="GET", headers=None, payload=None, timeout=12):
 
 
 def verify_supabase_user(authorization_header):
-    if not supabase_is_configured():
+    if not supabase_auth_is_configured():
         raise ApiError("Google login chưa được cấu hình.", 503)
 
     if not authorization_header or not authorization_header.startswith("Bearer "):
@@ -165,15 +169,21 @@ def verify_supabase_user(authorization_header):
 
 
 def call_quota_rpc(function_name, user_id, daily_limit=DAILY_AI_LIMIT):
+    if not supabase_quota_is_configured():
+        raise ApiError("Giới hạn AI chưa được cấu hình.", 503)
+
+    headers = {
+        "apikey": SUPABASE_SERVICE_ROLE_KEY,
+        "Content-Type": "application/json",
+    }
+    if not SUPABASE_SERVICE_ROLE_KEY.startswith("sb_secret_"):
+        headers["Authorization"] = f"Bearer {SUPABASE_SERVICE_ROLE_KEY}"
+
     try:
         result = request_json(
             f"{SUPABASE_URL}/rest/v1/rpc/{function_name}",
             method="POST",
-            headers={
-                "apikey": SUPABASE_SERVICE_ROLE_KEY,
-                "Authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}",
-                "Content-Type": "application/json",
-            },
+            headers=headers,
             payload={"p_user_id": user_id, "p_daily_limit": daily_limit},
         )
     except urllib.error.HTTPError as error:
@@ -314,7 +324,8 @@ class Handler(SimpleHTTPRequestHandler):
                 {
                     "supabaseUrl": SUPABASE_URL,
                     "supabaseAnonKey": SUPABASE_ANON_KEY,
-                    "authConfigured": supabase_is_configured(),
+                    "authConfigured": supabase_auth_is_configured(),
+                    "quotaConfigured": supabase_quota_is_configured(),
                     "dailyAiLimit": DAILY_AI_LIMIT,
                 }
             )
