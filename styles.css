@@ -743,6 +743,41 @@ h2 {
   transition: width 180ms ease;
 }
 
+.catalog-picker {
+  margin-bottom: 16px;
+  border: 1px solid rgba(69, 216, 255, 0.22);
+  border-radius: 18px;
+  padding: 14px;
+  background: rgba(69, 216, 255, 0.045);
+}
+
+.catalog-picker-head,
+.creative-results-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.catalog-picker-head span,
+.catalog-picker-head small {
+  display: block;
+}
+
+.catalog-picker-head > div > span {
+  color: var(--soft);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.catalog-picker-head small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
 .preset-row {
   display: flex;
   flex-wrap: wrap;
@@ -1159,6 +1194,86 @@ select:focus {
   line-height: 1.5;
 }
 
+.creative-results {
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 16px;
+  background: rgba(8, 13, 18, 0.72);
+}
+
+.creative-results-head {
+  margin-bottom: 14px;
+}
+
+.creative-results-head strong,
+.creative-results-head span {
+  display: block;
+}
+
+.creative-empty {
+  min-height: 112px;
+  display: grid;
+  place-items: center;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 22px;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.6;
+}
+
+.creative-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.creative-card {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #0a0f15;
+}
+
+.creative-card img {
+  width: 100%;
+  display: block;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  background: #111820;
+}
+
+.creative-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px;
+}
+
+.creative-card-footer span {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--soft);
+  font-size: 11px;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.download-creative {
+  min-height: 34px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(32, 245, 166, 0.35);
+  border-radius: 10px;
+  padding: 0 11px;
+  color: #07110d;
+  background: var(--green);
+  font-size: 11px;
+  font-weight: 950;
+  cursor: pointer;
+}
+
 .output-card {
   overflow: hidden;
   border: 1px solid var(--line);
@@ -1424,6 +1539,10 @@ pre {
   .auth-area {
     width: 100%;
     flex-wrap: wrap;
+  }
+
+  .creative-grid {
+    grid-template-columns: 1fr;
   }
 
   .hero {

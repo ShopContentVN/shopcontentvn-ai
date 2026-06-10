@@ -215,6 +215,42 @@
             <div class="quality-bar"><span id="briefQualityBar"></span></div>
           </div>
 
+          <section class="catalog-picker">
+            <div class="catalog-picker-head">
+              <div>
+                <span>Chọn ngành hàng và nhu cầu</span>
+                <small>App sẽ đổi cách viết và phong cách ảnh theo lựa chọn này.</small>
+              </div>
+              <span class="beta-badge">Smart flow</span>
+            </div>
+            <div class="field-grid">
+              <label class="field">
+                <span>Ngành hàng</span>
+                <select id="category" name="category">
+                  <option value="beauty">Mỹ phẩm</option>
+                  <option value="fashion">Thời trang</option>
+                  <option value="home">Đồ gia dụng</option>
+                  <option value="toys">Đồ chơi</option>
+                  <option value="food">Đồ ăn & đồ uống</option>
+                  <option value="electronics">Điện tử</option>
+                  <option value="momBaby">Mẹ và bé</option>
+                  <option value="accessories">Phụ kiện</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Mục tiêu</span>
+                <select id="contentGoal" name="contentGoal">
+                  <option value="social">Bài đăng mạng xã hội</option>
+                  <option value="shopee">Ảnh Shopee</option>
+                  <option value="tiktok">Video/TikTok Shop</option>
+                  <option value="sale">Flash sale</option>
+                  <option value="livestream">Livestream</option>
+                  <option value="ads">Chạy quảng cáo</option>
+                </select>
+              </label>
+            </div>
+          </section>
+
           <section class="image-analyzer">
             <div class="image-analyzer-head">
               <div>
@@ -358,6 +394,20 @@
             <span>6 phương án mỗi loại</span>
             <p>Không hợp bản đầu thì chuyển tiếp, chỉnh nhẹ rồi đăng. Không cần generate lại từ đầu.</p>
           </div>
+
+          <section class="creative-results" id="creativeResults">
+            <div class="creative-results-head">
+              <div>
+                <span class="result-kicker">Ảnh đăng bán</span>
+                <strong>Bộ ảnh được dựng cùng nội dung</strong>
+              </div>
+              <button type="button" class="text-button" id="rebuildCreatives">Dựng lại ảnh</button>
+            </div>
+            <div class="creative-empty" id="creativeEmpty">
+              Kéo ảnh sản phẩm vào form rồi tạo nội dung. App sẽ dựng 3 ảnh 4:5 để tải xuống.
+            </div>
+            <div class="creative-grid" id="creativeGrid" hidden></div>
+          </section>
 
           <div class="source-outputs" hidden>
             <pre id="captionOutput">Nhập sản phẩm rồi bấm "Tạo bộ nội dung".</pre>

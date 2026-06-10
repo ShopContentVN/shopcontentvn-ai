@@ -39,8 +39,12 @@ const userAvatar = document.querySelector("#userAvatar");
 const userEmail = document.querySelector("#userEmail");
 const quotaBadge = document.querySelector("#quotaBadge");
 const quotaRemaining = document.querySelector("#quotaRemaining");
+const creativeGrid = document.querySelector("#creativeGrid");
+const creativeEmpty = document.querySelector("#creativeEmpty");
+const rebuildCreativesButton = document.querySelector("#rebuildCreatives");
 
 let selectedImages = [];
+let generatedCreatives = [];
 let authClient = null;
 let authSession = null;
 let authConfigured = false;
@@ -158,6 +162,26 @@ const defaults = {
   customer: "khách đang mua online",
   pain: "muốn chọn nhanh nhưng sợ mua không hợp",
   benefits: "dễ dùng, đẹp, hợp nhu cầu hằng ngày",
+};
+
+const categoryProfiles = {
+  beauty: { label: "Mỹ phẩm", colors: ["#f8d9e5", "#ff6f91", "#35142a"] },
+  fashion: { label: "Thời trang", colors: ["#e9ff70", "#18d6a5", "#071612"] },
+  home: { label: "Đồ gia dụng", colors: ["#dff4ff", "#2f91ff", "#07182c"] },
+  toys: { label: "Đồ chơi", colors: ["#ffe46d", "#ff6b45", "#30120b"] },
+  food: { label: "Đồ ăn & đồ uống", colors: ["#fff0c2", "#ff8a24", "#321606"] },
+  electronics: { label: "Điện tử", colors: ["#d9e1ff", "#765dff", "#0c1027"] },
+  momBaby: { label: "Mẹ và bé", colors: ["#e6f8ef", "#4cc99b", "#0a251c"] },
+  accessories: { label: "Phụ kiện", colors: ["#f5e7ff", "#c46bff", "#24102f"] },
+};
+
+const goalProfiles = {
+  social: { label: "Bài đăng", badge: "NEW POST" },
+  shopee: { label: "Ảnh Shopee", badge: "SHOP READY" },
+  tiktok: { label: "TikTok Shop", badge: "TREND PICK" },
+  sale: { label: "Flash sale", badge: "SALE TODAY" },
+  livestream: { label: "Livestream", badge: "LIVE PICK" },
+  ads: { label: "Quảng cáo", badge: "BEST CHOICE" },
 };
 
 const normalize = (value, fallback) => String(value || "").trim() || fallback;
@@ -468,7 +492,202 @@ const getFormData = () => {
     tone: normalize(data.get("tone"), "friendly"),
     detailLevel: normalize(data.get("detailLevel"), "balanced"),
     benefits: normalize(data.get("benefits"), defaults.benefits),
+    category: normalize(data.get("category"), "beauty"),
+    goal: normalize(data.get("contentGoal"), "social"),
   };
+};
+
+const loadCanvasImage = (source) =>
+  new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = source;
+  });
+
+const roundedRect = (context, x, y, width, height, radius) => {
+  const safeRadius = Math.min(radius, width / 2, height / 2);
+  context.beginPath();
+  context.moveTo(x + safeRadius, y);
+  context.arcTo(x + width, y, x + width, y + height, safeRadius);
+  context.arcTo(x + width, y + height, x, y + height, safeRadius);
+  context.arcTo(x, y + height, x, y, safeRadius);
+  context.arcTo(x, y, x + width, y, safeRadius);
+  context.closePath();
+};
+
+const drawCoverImage = (context, image, x, y, width, height) => {
+  const scale = Math.max(width / image.width, height / image.height);
+  const sourceWidth = width / scale;
+  const sourceHeight = height / scale;
+  const sourceX = (image.width - sourceWidth) / 2;
+  const sourceY = (image.height - sourceHeight) / 2;
+  context.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, x, y, width, height);
+};
+
+const wrapCanvasText = (context, text, maxWidth, maxLines = 3) => {
+  const words = String(text).trim().split(/\s+/);
+  const lines = [];
+  let line = "";
+
+  words.forEach((word) => {
+    const candidate = line ? `${line} ${word}` : word;
+    if (context.measureText(candidate).width <= maxWidth || !line) {
+      line = candidate;
+    } else if (lines.length < maxLines - 1) {
+      lines.push(line);
+      line = word;
+    }
+  });
+
+  if (line && lines.length < maxLines) lines.push(line);
+  return lines;
+};
+
+const renderCreativeCards = () => {
+  creativeGrid.replaceChildren();
+  creativeGrid.hidden = generatedCreatives.length === 0;
+  creativeGrid.style.display = generatedCreatives.length ? "grid" : "";
+  creativeEmpty.hidden = generatedCreatives.length > 0;
+
+  generatedCreatives.forEach((creative, index) => {
+    const card = document.createElement("article");
+    card.className = "creative-card";
+    const preview = document.createElement("img");
+    preview.src = creative.dataUrl;
+    preview.alt = `Ảnh bán hàng phương án ${index + 1}`;
+
+    const footer = document.createElement("div");
+    footer.className = "creative-card-footer";
+    const label = document.createElement("span");
+    label.textContent = creative.label;
+    const downloadButton = document.createElement("button");
+    downloadButton.type = "button";
+    downloadButton.className = "download-creative";
+    downloadButton.textContent = "Tải ảnh";
+    downloadButton.addEventListener("click", () => {
+      const link = document.createElement("a");
+      link.href = creative.dataUrl;
+      link.download = `shopcontentvn-${index + 1}.jpg`;
+      link.click();
+    });
+
+    footer.append(label, downloadButton);
+    card.append(preview, footer);
+    creativeGrid.appendChild(card);
+  });
+};
+
+const buildCreative = async (imageSource, input, variantIndex) => {
+  const image = await loadCanvasImage(imageSource);
+  const canvas = document.createElement("canvas");
+  canvas.width = 1080;
+  canvas.height = 1350;
+  const context = canvas.getContext("2d");
+  const category = categoryProfiles[input.category] || categoryProfiles.beauty;
+  const goal = goalProfiles[input.goal] || goalProfiles.social;
+  const [light, accent, dark] = category.colors;
+  const benefits = splitBenefits(input.benefits);
+  const headline = variantIndex === 1 ? goal.label : input.product;
+  const supportingText =
+    variantIndex === 2
+      ? benefits.slice(0, 2).join(" • ")
+      : benefits[0] || `${category.label} dành cho bạn`;
+
+  const gradient = context.createLinearGradient(0, 0, canvas.width, canvas.height);
+  gradient.addColorStop(0, variantIndex === 1 ? dark : light);
+  gradient.addColorStop(1, variantIndex === 2 ? accent : dark);
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, canvas.width, canvas.height);
+
+  context.globalAlpha = 0.16;
+  context.fillStyle = variantIndex === 1 ? light : accent;
+  context.save();
+  context.translate(850, 120);
+  context.rotate(-0.28);
+  context.fillRect(-40, -180, 220, 640);
+  context.restore();
+  context.save();
+  context.translate(80, 1140);
+  context.rotate(0.22);
+  context.fillRect(-180, -60, 540, 180);
+  context.restore();
+  context.globalAlpha = 1;
+
+  roundedRect(context, 54, 54, 972, 790, 42);
+  context.save();
+  context.clip();
+  context.filter = "brightness(1.06) contrast(1.05) saturate(1.06)";
+  drawCoverImage(context, image, 54, 54, 972, 790);
+  context.restore();
+
+  const imageFade = context.createLinearGradient(0, 560, 0, 850);
+  imageFade.addColorStop(0, "rgba(5,8,12,0)");
+  imageFade.addColorStop(1, "rgba(5,8,12,0.82)");
+  context.fillStyle = imageFade;
+  context.fillRect(54, 500, 972, 344);
+
+  context.fillStyle = accent;
+  roundedRect(context, 76, 76, 230, 58, 18);
+  context.fill();
+  context.fillStyle = dark;
+  context.font = "900 24px Arial";
+  context.fillText(goal.badge, 98, 114);
+
+  context.fillStyle = "#ffffff";
+  context.font = "900 66px Arial";
+  wrapCanvasText(context, headline, 900, 2).forEach((line, index) =>
+    context.fillText(line, 76, 930 + index * 74)
+  );
+
+  context.fillStyle = variantIndex === 0 ? light : "#ffffff";
+  context.font = "700 31px Arial";
+  wrapCanvasText(context, supportingText, 900, 2).forEach((line, index) =>
+    context.fillText(line, 78, 1098 + index * 42)
+  );
+
+  context.fillStyle = "rgba(255,255,255,0.16)";
+  roundedRect(context, 76, 1215, 928, 76, 22);
+  context.fill();
+  context.fillStyle = "#ffffff";
+  context.font = "800 25px Arial";
+  context.fillText(`${category.label}  •  ${goal.label}`, 104, 1262);
+  context.textAlign = "right";
+  context.fillStyle = accent;
+  context.font = "900 25px Arial";
+  context.fillText("ShopContentVN", 978, 1262);
+  context.textAlign = "left";
+
+  return {
+    label: `${goal.label} · Mẫu ${variantIndex + 1}`,
+    dataUrl: canvas.toDataURL("image/jpeg", 0.9),
+  };
+};
+
+const createProductCreatives = async () => {
+  if (!selectedImages.length) {
+    generatedCreatives = [];
+    renderCreativeCards();
+    return;
+  }
+
+  rebuildCreativesButton.disabled = true;
+  rebuildCreativesButton.textContent = "Đang dựng...";
+  try {
+    const input = getFormData();
+    generatedCreatives = await Promise.all(
+      [0, 1, 2].map((variantIndex) =>
+        buildCreative(selectedImages[variantIndex % selectedImages.length], input, variantIndex)
+      )
+    );
+    renderCreativeCards();
+  } catch (error) {
+    console.error("Could not build creatives", error);
+    showToast("Chưa dựng được ảnh, thử ảnh khác");
+  } finally {
+    rebuildCreativesButton.disabled = false;
+    rebuildCreativesButton.textContent = "Dựng lại ảnh";
+  }
 };
 
 const buildBullets = (items, marker = "•") => items.map((item) => `${marker} ${sentenceCase(item)}`).join("\n");
@@ -483,13 +702,15 @@ const detailAddon = (level, input, benefits) => {
 
 const buildContent = (input) => {
   const tone = toneMap[input.tone] || toneMap.friendly;
+  const category = categoryProfiles[input.category] || categoryProfiles.beauty;
+  const goal = goalProfiles[input.goal] || goalProfiles.social;
   const benefits = splitBenefits(input.benefits);
   const benefitText = benefits.length ? benefits.join(", ") : input.benefits;
   const firstBenefit = benefits[0] || input.benefits;
 
   const caption = `${tone.opener} ${input.product}.\n\nVấn đề khách hay gặp:\n${input.pain}.\n\nĐiểm đáng chú ý:\n${buildBullets(benefits)}\n\nPhù hợp cho:\n${input.customer}.\n\n${tone.cta}${detailAddon(input.detailLevel, input, benefits)}`;
 
-  const description = `${sentenceCase(input.product)}\n\n${input.product} phù hợp cho ${input.customer}. Sản phẩm tập trung vào nhu cầu: ${input.pain}.\n\nĐiểm nổi bật:\n${buildBullets(benefits, "-")}\n\nVì sao nên chọn:\n- Dễ hiểu lợi ích, dễ tư vấn cho khách.\n- Phù hợp để đăng ${input.channel} hoặc dùng làm mô tả sản phẩm.\n- Có thể biến thành caption, kịch bản video hoặc nội dung live.\n\nLưu ý: Shop nên bổ sung size, màu, chất liệu, chính sách đổi trả và hình thật nếu có.`;
+  const description = `${sentenceCase(input.product)}\n\nNgành hàng: ${category.label}\nMục tiêu nội dung: ${goal.label}\n\n${input.product} phù hợp cho ${input.customer}. Sản phẩm tập trung vào nhu cầu: ${input.pain}.\n\nĐiểm nổi bật:\n${buildBullets(benefits, "-")}\n\nVì sao nên chọn:\n- Dễ hiểu lợi ích, dễ tư vấn cho khách.\n- Phù hợp để đăng ${input.channel} hoặc dùng làm mô tả sản phẩm.\n- Có thể biến thành caption, kịch bản video hoặc nội dung live.\n\nLưu ý: Shop nên bổ sung size, màu, chất liệu, chính sách đổi trả và hình thật nếu có.`;
 
   const hooks = `1. Nếu bạn đang ${input.pain}, xem thử ${input.product} này.\n\n2. 3 lý do ${input.customer} nên cân nhắc ${input.product}: ${firstBenefit}.\n\n3. Đừng chọn ${input.product} chỉ vì rẻ. Hãy nhìn vào điểm này trước: ${benefitText}.\n\n4. Mua online dễ sai nhất ở chỗ này: không biết sản phẩm có hợp nhu cầu thật không.\n\n5. Đây là cách shop tư vấn ${input.product} cho khách đang phân vân.`;
 
@@ -601,7 +822,8 @@ const simulateGenerate = async () => {
 
   try {
     renderContent(buildContent(input));
-    showToast("Đã tạo miễn phí, không trừ lượt");
+    if (selectedImages.length) await createProductCreatives();
+    showToast(selectedImages.length ? "Đã tạo nội dung và 3 ảnh đăng bán" : "Đã tạo miễn phí, không trừ lượt");
   } finally {
     loadingState.hidden = true;
     outputGrid.style.opacity = "1";
@@ -711,8 +933,10 @@ uploadZone.addEventListener("drop", async (event) => {
 
 clearImagesButton.addEventListener("click", () => {
   selectedImages = [];
+  generatedCreatives = [];
   analysisWarning.hidden = true;
   renderImagePreviews();
+  renderCreativeCards();
   showToast("Đã xóa ảnh");
 });
 
@@ -726,6 +950,7 @@ analyzeImagesButton.addEventListener("click", async () => {
   try {
     const result = await analyzeImagesWithApi();
     applyImageAnalysis(result.analysis || result);
+    await createProductCreatives();
     showToast(result.mode === "openai" ? "Đã phân tích ảnh" : "Đã điền brief mẫu");
   } catch (error) {
     if (error.name === "AuthRequiredError") {
@@ -745,6 +970,8 @@ analyzeImagesButton.addEventListener("click", async () => {
 });
 
 fillDemoButton.addEventListener("click", () => fillSample(samples.shirt));
+
+rebuildCreativesButton.addEventListener("click", createProductCreatives);
 
 clearFormButton.addEventListener("click", () => {
   form.reset();
@@ -844,4 +1071,5 @@ if (feedbackForm) {
 
 updateBriefQuality();
 renderVariantPlayer();
+renderCreativeCards();
 initializeAuth();

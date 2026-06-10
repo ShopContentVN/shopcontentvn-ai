@@ -4,10 +4,13 @@ App demo cho seller Viet:
 
 - Nhap ten san pham.
 - Chon kenh ban va tone.
+- Chon nganh hang va muc tieu noi dung.
 - Tao caption, mo ta Shopee, hook video va kich ban livestream.
 - Upload 1-3 anh san pham de AI goi y brief.
-- Dang nhap Google de dung AI.
-- Gioi han 5 luot AI moi ngay cho moi tai khoan.
+- Tu dong dung 3 poster san pham 4:5 de tai xuong.
+- Tao content chu mien phi, khong can dang nhap.
+- Dang nhap Google khi can AI phan tich anh.
+- Gioi han 5 luot phan tich anh moi ngay cho moi tai khoan.
 - Copy tung phan hoac copy tat ca.
 
 Chay local:
@@ -24,10 +27,10 @@ http://127.0.0.1:5506/
 
 Neu co `OPENAI_API_KEY`, backend se goi OpenAI qua:
 
-- `/api/generate`: tao content.
 - `/api/analyze-image`: phan tich anh va tu dien brief.
 
-Neu chua co key, app tu chay fallback demo de khong bi chet flow. Che do demo khong thuc su doc noi dung anh.
+Content chu va poster template chay mien phi ngay trong app. Neu chua co key,
+phan tich anh se dung fallback demo va khong thuc su doc noi dung anh.
 
 Set key tren PowerShell:
 
