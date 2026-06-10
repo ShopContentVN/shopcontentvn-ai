@@ -65,3 +65,40 @@ revoke all on function public.consume_daily_ai_quota(uuid, integer) from public,
 revoke all on function public.get_daily_ai_remaining(uuid, integer) from public, anon, authenticated;
 grant execute on function public.consume_daily_ai_quota(uuid, integer) to service_role;
 grant execute on function public.get_daily_ai_remaining(uuid, integer) to service_role;
+
+create table if not exists public.content_history (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  product_name text not null,
+  category text not null default '',
+  channel text not null default '',
+  brief jsonb not null default '{}'::jsonb,
+  content jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists content_history_user_created_idx
+  on public.content_history (user_id, created_at desc);
+
+alter table public.content_history enable row level security;
+
+drop policy if exists "Users can read own content history" on public.content_history;
+create policy "Users can read own content history"
+  on public.content_history for select
+  to authenticated
+  using (auth.uid() = user_id);
+
+drop policy if exists "Users can add own content history" on public.content_history;
+create policy "Users can add own content history"
+  on public.content_history for insert
+  to authenticated
+  with check (auth.uid() = user_id);
+
+drop policy if exists "Users can delete own content history" on public.content_history;
+create policy "Users can delete own content history"
+  on public.content_history for delete
+  to authenticated
+  using (auth.uid() = user_id);
+
+revoke all on table public.content_history from anon;
+grant select, insert, delete on table public.content_history to authenticated;

@@ -13,6 +13,10 @@ App demo cho seller Viet:
 - Tao content chu mien phi, khong can dang nhap.
 - Dang nhap Google khi can AI phan tich anh.
 - Gioi han 5 luot phan tich anh moi ngay cho moi tai khoan.
+- Luu lich su brief va noi dung; khong luu anh san pham.
+- Tai khoan Google dong bo toi da 50 ban qua Supabase RLS.
+- Khach chua dang nhap luu toi da 20 ban tren trinh duyet.
+- Khi tao lai cung san pham, app doi goc mo bai va CTA de han che lap noi dung.
 - Copy tung phan hoac copy tat ca.
 
 Chay local:

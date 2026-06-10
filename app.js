@@ -51,10 +51,14 @@ const creativeModalClose = document.querySelector("#creativeModalClose");
 const creativeModalImage = document.querySelector("#creativeModalImage");
 const creativeModalTitle = document.querySelector("#creativeModalTitle");
 const creativeModalDownload = document.querySelector("#creativeModalDownload");
+const historyList = document.querySelector("#historyList");
+const historyEmpty = document.querySelector("#historyEmpty");
+const clearHistoryButton = document.querySelector("#clearHistory");
 
 let selectedImages = [];
 let generatedCreatives = [];
 let activeCreative = null;
+let contentHistory = [];
 let authClient = null;
 let authSession = null;
 let authConfigured = false;
@@ -240,6 +244,183 @@ const updateAuthDisplay = (session) => {
   }
 };
 
+const HISTORY_STORAGE_KEY = "shopcontentvn-content-history";
+const LOCAL_HISTORY_LIMIT = 20;
+const ACCOUNT_HISTORY_LIMIT = 50;
+
+const readLocalHistory = () => {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(HISTORY_STORAGE_KEY) || "[]");
+    return Array.isArray(parsed) ? parsed.slice(0, LOCAL_HISTORY_LIMIT) : [];
+  } catch {
+    return [];
+  }
+};
+
+const writeLocalHistory = (items) => {
+  localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(items.slice(0, LOCAL_HISTORY_LIMIT)));
+};
+
+const formatHistoryTime = (value) => {
+  try {
+    return new Intl.DateTimeFormat("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(value));
+  } catch {
+    return "";
+  }
+};
+
+const restoreHistoryItem = (item) => {
+  const brief = item.brief || {};
+  const fieldMap = {
+    productName: brief.product,
+    customer: brief.customer,
+    painPoint: brief.pain,
+    channel: brief.channel,
+    tone: brief.tone,
+    detailLevel: brief.detailLevel,
+    benefits: brief.benefits,
+    productSummary: brief.productSummary,
+    category: brief.category,
+    contentGoal: brief.goal,
+  };
+
+  Object.entries(fieldMap).forEach(([key, value]) => {
+    if (value && form.elements[key]) form.elements[key].value = value;
+  });
+
+  if (item.content) renderContent(item.content);
+  updateBriefQuality();
+  document.querySelector("#tool").scrollIntoView({ behavior: "smooth", block: "start" });
+  showToast("Đã mở lại nội dung");
+};
+
+const renderHistory = () => {
+  historyList.replaceChildren();
+  historyEmpty.hidden = contentHistory.length > 0;
+  historyList.hidden = contentHistory.length === 0;
+  clearHistoryButton.disabled = contentHistory.length === 0;
+
+  contentHistory.forEach((item) => {
+    const card = document.createElement("article");
+    card.className = "history-item";
+
+    const copy = document.createElement("div");
+    copy.className = "history-item-copy";
+    const meta = document.createElement("span");
+    meta.textContent = `${formatHistoryTime(item.created_at)} · ${item.brief?.channel || item.channel || "Content"}`;
+    const title = document.createElement("strong");
+    title.textContent = item.brief?.product || item.product_name || "Sản phẩm";
+    const excerpt = document.createElement("p");
+    excerpt.textContent = item.content?.caption || "Nội dung đã lưu";
+    copy.append(meta, title, excerpt);
+
+    const actions = document.createElement("div");
+    actions.className = "history-item-actions";
+    const restoreButton = document.createElement("button");
+    restoreButton.type = "button";
+    restoreButton.textContent = "Mở lại";
+    restoreButton.addEventListener("click", () => restoreHistoryItem(item));
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "history-delete";
+    deleteButton.textContent = "Xóa";
+    deleteButton.addEventListener("click", () => deleteHistoryItem(item));
+    actions.append(restoreButton, deleteButton);
+
+    card.append(copy, actions);
+    historyList.appendChild(card);
+  });
+};
+
+const loadHistory = async () => {
+  if (authSession && authClient) {
+    const { data, error } = await authClient
+      .from("content_history")
+      .select("id, product_name, category, channel, brief, content, created_at")
+      .order("created_at", { ascending: false })
+      .limit(ACCOUNT_HISTORY_LIMIT);
+    if (!error) {
+      const accountHistory = data || [];
+      contentHistory = accountHistory.length ? accountHistory : readLocalHistory();
+      renderHistory();
+      return;
+    }
+    console.warn("Could not load account history", error);
+  }
+
+  contentHistory = readLocalHistory();
+  renderHistory();
+};
+
+const saveHistory = async (brief, content) => {
+  const record = {
+    id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
+    product_name: brief.product,
+    category: brief.category,
+    channel: brief.channel,
+    brief,
+    content,
+    created_at: new Date().toISOString(),
+  };
+
+  contentHistory = [record, ...contentHistory].slice(0, authSession ? ACCOUNT_HISTORY_LIMIT : LOCAL_HISTORY_LIMIT);
+  renderHistory();
+
+  if (authSession && authClient) {
+    const { data, error } = await authClient
+      .from("content_history")
+      .insert({
+        user_id: authSession.user.id,
+        product_name: record.product_name,
+        category: record.category,
+        channel: record.channel,
+        brief: record.brief,
+        content: record.content,
+      })
+      .select("id, product_name, category, channel, brief, content, created_at")
+      .single();
+    if (!error && data) {
+      contentHistory[0] = data;
+      writeLocalHistory([]);
+      renderHistory();
+      return;
+    }
+    console.warn("Could not sync account history", error);
+  }
+
+  writeLocalHistory(contentHistory);
+};
+
+const deleteHistoryItem = async (item) => {
+  contentHistory = contentHistory.filter((entry) => entry.id !== item.id);
+  renderHistory();
+
+  if (authSession && authClient && item.id) {
+    const { error } = await authClient.from("content_history").delete().eq("id", item.id);
+    if (error) console.warn("Could not delete account history", error);
+  } else {
+    writeLocalHistory(contentHistory);
+  }
+};
+
+const clearHistory = async () => {
+  const ids = contentHistory.map((item) => item.id).filter(Boolean);
+  contentHistory = [];
+  renderHistory();
+  writeLocalHistory([]);
+
+  if (authSession && authClient && ids.length) {
+    const { error } = await authClient.from("content_history").delete().in("id", ids);
+    if (error) console.warn("Could not clear account history", error);
+  }
+  showToast("Đã xóa lịch sử");
+};
+
 const startGoogleLogin = async () => {
   if (!authConfigured || !authClient) {
     showToast("Chưa cấu hình đăng nhập Google");
@@ -351,9 +532,11 @@ const initializeAuth = async () => {
     if (error) throw error;
     updateAuthDisplay(data.session);
     if (data.session) await refreshQuota();
+    await loadHistory();
 
     authClient.auth.onAuthStateChange((event, session) => {
       updateAuthDisplay(session);
+      window.setTimeout(loadHistory, 0);
       if (session) {
         window.setTimeout(refreshQuota, 0);
         if (event === "SIGNED_IN" && (window.location.search || window.location.hash)) {
@@ -831,8 +1014,25 @@ const buildContent = (input) => {
   const benefitText = benefits.length ? benefits.join(", ") : input.benefits;
   const firstBenefit = benefits[0] || input.benefits;
   const productSummary = input.productSummary || buildProductSummary(input);
+  const historyRound = Number(input.historyRound || 0);
+  const openingAngles = [
+    `${tone.opener} ${input.product}.`,
+    `Nếu đang phân vân về ${input.product}, đây là những điểm nên xem trước khi chọn.`,
+    `${sentenceCase(input.pain)}? Bắt đầu bằng việc chọn đúng ${input.product}.`,
+    `Review nhanh ${input.product} dành cho ${input.customer}.`,
+    `Ba điều đáng chú ý trước khi mua ${input.product}.`,
+  ];
+  const ctas = [
+    tone.cta,
+    'Comment "tư vấn" để shop gợi ý lựa chọn phù hợp.',
+    'Nhắn shop nhu cầu của bạn để được kiểm tra mẫu phù hợp.',
+    'Lưu bài lại và gửi shop nếu cần xem thêm thông tin thật.',
+    'Comment "chi tiết" để shop gửi giá, phân loại và cách chọn.',
+  ];
+  const selectedOpening = openingAngles[historyRound % openingAngles.length];
+  const selectedCta = ctas[historyRound % ctas.length];
 
-  const caption = `${tone.opener} ${input.product}.\n\nVấn đề khách hay gặp:\n${input.pain}.\n\nĐiểm đáng chú ý:\n${buildBullets(benefits)}\n\nPhù hợp cho:\n${input.customer}.\n\n${tone.cta}${detailAddon(input.detailLevel, input, benefits)}`;
+  const caption = `${selectedOpening}\n\nVấn đề khách hay gặp:\n${input.pain}.\n\nĐiểm đáng chú ý:\n${buildBullets(benefits)}\n\nPhù hợp cho:\n${input.customer}.\n\n${selectedCta}${detailAddon(input.detailLevel, input, benefits)}`;
 
   const description = `${sentenceCase(input.product)}\n\nNgành hàng: ${category.label}\nMục tiêu nội dung: ${goal.label}\n\nGIỚI THIỆU SẢN PHẨM\n${productSummary}\n\nĐiểm nổi bật:\n${buildBullets(benefits, "-")}\n\nThông tin tư vấn nhanh:\n- Khách hàng phù hợp: ${input.customer}.\n- Nhu cầu chính: ${input.pain}.\n- Kênh sử dụng: ${input.channel}.\n\nLưu ý: Shop nên bổ sung giá, phân loại, kích thước, chất liệu, cách dùng và chính sách đổi trả nếu có.`;
 
@@ -943,14 +1143,19 @@ const simulateGenerate = async () => {
     form.elements.productSummary.value = buildProductSummary(input);
     input = getFormData();
   }
+  input.historyRound = contentHistory.filter(
+    (item) => normalize(item.brief?.product || item.product_name, "").toLowerCase() === input.product.toLowerCase()
+  ).length;
   loadingState.hidden = false;
   outputGrid.style.opacity = "0.45";
   generateButton.disabled = true;
   generateButton.querySelector("span").textContent = "Đang tạo nội dung...";
 
   try {
-    renderContent(buildContent(input));
+    const content = buildContent(input);
+    renderContent(content);
     if (selectedImages.length) await createProductCreatives();
+    await saveHistory(input, content);
     showToast(selectedImages.length ? "Đã tạo nội dung và 3 ảnh đăng bán" : "Đã tạo miễn phí, không trừ lượt");
   } finally {
     loadingState.hidden = true;
@@ -1180,8 +1385,11 @@ logoutButton.addEventListener("click", async () => {
   if (!authClient) return;
   await authClient.auth.signOut({ scope: "local" });
   updateAuthDisplay(null);
+  await loadHistory();
   showToast("Đã đăng xuất");
 });
+
+clearHistoryButton.addEventListener("click", clearHistory);
 
 if (feedbackForm) {
   feedbackForm.addEventListener("submit", async (event) => {
@@ -1211,4 +1419,6 @@ if (feedbackForm) {
 updateBriefQuality();
 renderVariantPlayer();
 renderCreativeCards();
+renderHistory();
+loadHistory();
 initializeAuth();

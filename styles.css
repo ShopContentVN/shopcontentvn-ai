@@ -1470,6 +1470,113 @@ body.modal-open {
   font-size: 12px;
 }
 
+.history-panel {
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 16px;
+  background: rgba(8, 13, 18, 0.72);
+}
+
+.history-privacy {
+  margin: -4px 0 14px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.history-empty {
+  min-height: 92px;
+  display: grid;
+  place-items: center;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 18px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.history-list {
+  display: grid;
+  gap: 9px;
+  max-height: 420px;
+  overflow: auto;
+  padding-right: 3px;
+}
+
+.history-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.history-item-copy {
+  min-width: 0;
+}
+
+.history-item-copy span,
+.history-item-copy strong {
+  display: block;
+}
+
+.history-item-copy span {
+  color: var(--green);
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.history-item-copy strong {
+  margin-top: 4px;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-item-copy p {
+  display: -webkit-box;
+  margin: 5px 0 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.history-item-actions {
+  display: flex;
+  gap: 7px;
+}
+
+.history-item-actions button {
+  min-height: 36px;
+  border: 1px solid rgba(32, 245, 166, 0.28);
+  border-radius: 10px;
+  padding: 0 10px;
+  color: var(--green);
+  background: rgba(32, 245, 166, 0.07);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.history-item-actions .history-delete {
+  border-color: rgba(255, 95, 162, 0.25);
+  color: #ff87bb;
+  background: rgba(255, 95, 162, 0.06);
+}
+
+#clearHistory:disabled {
+  cursor: default;
+  opacity: 0.38;
+}
+
 @media (max-width: 640px) {
   .creative-modal {
     padding: 8px;
@@ -1487,6 +1594,14 @@ body.modal-open {
 
   .creative-modal-actions .download-creative {
     min-height: 44px;
+  }
+
+  .history-item {
+    grid-template-columns: 1fr;
+  }
+
+  .history-item-actions button {
+    flex: 1;
   }
 }
 
